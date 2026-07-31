@@ -59,21 +59,37 @@ if ($remotes -notmatch "amorsoftlab/OpenTransfer") {
 # 4. Commit and Push Code
 Write-Host "`n[4/5] Committing & Pushing to GitHub..." -ForegroundColor Yellow
 git add .
-git commit -m "Release ${tag}: OpenTransfer v$version build and source code"
+$status = git status --porcelain
+if ($status) {
+    git commit -m "Release ${tag}: OpenTransfer v$version build and source code"
+} else {
+    Write-Host "Working tree clean, skipping commit." -ForegroundColor Gray
+}
 git branch -M main
 git push -u origin main -f
+
+# Push Git Release Tag
+Write-Host "Pushing git tag $tag to origin..." -ForegroundColor Gray
+git tag -f $tag
+git push origin $tag -f
 
 # 5. Create GitHub Release & Upload Asset
 Write-Host "`n[5/5] Creating GitHub Release ($tag)..." -ForegroundColor Yellow
 if (Get-Command "gh" -ErrorAction SilentlyContinue) {
     $setupFile = Get-ChildItem "$projectDir\release_output\*" | Select-Object -First 1
     if ($setupFile) {
-        gh release create $tag $setupFile.FullName --title "OpenTransfer $tag" --notes "Native High-Speed Android USB File Transfer Application Release $tag"
-        Write-Host "🎉 GitHub Release $tag created with asset $($setupFile.Name)!" -ForegroundColor Green
+        try {
+            gh release create $tag $setupFile.FullName --title "OpenTransfer $tag" --notes "Native High-Speed Android USB File Transfer Application Release $tag" --clobber
+            Write-Host "🎉 GitHub Release $tag created with asset $($setupFile.Name)!" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ Could not auto-upload via gh CLI. Tag $tag is pushed to GitHub." -ForegroundColor Yellow
+            Write-Host "You can upload $($setupFile.Name) at https://github.com/amorsoftlab/OpenTransfer/releases/tag/$tag" -ForegroundColor Cyan
+        }
     }
 } else {
     Write-Host "⚠️ GitHub CLI ('gh') is not installed." -ForegroundColor Yellow
-    Write-Host "Please create a release on https://github.com/amorsoftlab/OpenTransfer/releases with tag '$tag' and upload the installer from 'release_output'." -ForegroundColor Cyan
+    Write-Host "Tag $tag has been pushed to GitHub." -ForegroundColor Green
+    Write-Host "Upload the installer from 'release_output' at https://github.com/amorsoftlab/OpenTransfer/releases" -ForegroundColor Cyan
 }
 
 Write-Host "`n==================================================" -ForegroundColor Green
