@@ -106,6 +106,9 @@ namespace openTransferWPF.Services
             }
 
             int totalCount = remoteFiles.Count;
+            long totalSizeJobBytes = 0;
+            foreach (var rf in remoteFiles) { totalSizeJobBytes += Math.Max(0, rf.SizeBytes); }
+
             int copiedCount = 0;
             int skippedCount = 0;
             long totalBytesTransferred = 0;
@@ -134,7 +137,17 @@ namespace openTransferWPF.Services
                     relPath = relPath.Substring(cleanRemoteBase.Length).TrimStart('/', '\\');
                 }
 
-                string localTargetPath = Path.Combine(localDestDir, relPath.Replace('/', Path.DirectorySeparatorChar));
+                // Check Auto-Split Settings
+                string effectiveLocalDest = localDestDir;
+                var settings = SettingsService.Instance.Settings;
+                if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
+                {
+                    int batchIndex = (i / settings.AutoSplitBatchSize) + 1;
+                    string subFolder = settings.AutoSplitNamingFormat == "Day" ? $"day 1-{batchIndex}" : $"photo-{batchIndex}";
+                    effectiveLocalDest = Path.Combine(localDestDir, subFolder);
+                }
+
+                string localTargetPath = Path.Combine(effectiveLocalDest, relPath.Replace('/', Path.DirectorySeparatorChar));
 
                 // O(1) Dictionary Skip Check
                 if (strategyMode == "SkipExisting")
@@ -143,7 +156,7 @@ namespace openTransferWPF.Services
                     {
                         skippedCount++;
                         logger.Report($"⏩ Skipped (Already Exists): {rfile.Name}");
-                        ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, 0, rfile.SizeBytes);
+                        ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, 0, rfile.SizeBytes);
                         continue;
                     }
                 }
@@ -155,7 +168,7 @@ namespace openTransferWPF.Services
                 {
                     currentFileTransferred = curBytes;
                     // Always report per-file progress immediately
-                    ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred + curBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, curBytes, rfile.SizeBytes);
+                    ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred + curBytes, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, curBytes, rfile.SizeBytes);
                 });
 
                 bool success = false;
@@ -184,7 +197,7 @@ namespace openTransferWPF.Services
                 long nowTicks = Stopwatch.GetTimestamp();
                 if (nowTicks - lastReportTicks >= reportIntervalTicks || i == totalCount - 1)
                 {
-                    ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, rfile.SizeBytes, rfile.SizeBytes);
+                    ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, rfile.SizeBytes, rfile.SizeBytes);
                     lastReportTicks = nowTicks;
                 }
             }
@@ -249,6 +262,12 @@ namespace openTransferWPF.Services
             logger.Report($"✓ Indexed {remoteIndex.Count} remote files in target location.");
 
             int totalCount = itemsToPush.Count;
+            long totalSizeJobBytes = 0;
+            foreach (var item in itemsToPush)
+            {
+                try { totalSizeJobBytes += new FileInfo(item.LocalPath).Length; } catch { }
+            }
+
             int uploadedCount = 0;
             int skippedCount = 0;
             long totalBytesTransferred = 0;
@@ -258,7 +277,7 @@ namespace openTransferWPF.Services
             var createdDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             long lastReportTicks = 0;
-            long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle
+            long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle for overall stats
 
             for (int i = 0; i < itemsToPush.Count; i++)
             {
@@ -271,43 +290,57 @@ namespace openTransferWPF.Services
                 }
 
                 var item = itemsToPush[i];
-                string localFile = item.LocalPath;
-                string fileName = Path.GetFileName(localFile);
-                var localInfo = new FileInfo(localFile);
-                long fileSize = localInfo.Length;
 
-                string remoteTargetFile = $"{cleanRemoteBase}/{item.RelativeRemotePath}";
+                // Check Auto-Split Settings
+                string effectiveRemoteBase = cleanRemoteBase;
+                var settings = SettingsService.Instance.Settings;
+                if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
+                {
+                    int batchIndex = (i / settings.AutoSplitBatchSize) + 1;
+                    string subFolder = settings.AutoSplitNamingFormat == "Day" ? $"day 1-{batchIndex}" : $"photo-{batchIndex}";
+                    effectiveRemoteBase = $"{cleanRemoteBase}/{subFolder}";
+                }
 
-                // O(1) Dictionary Skip Check
+                string remoteTargetFile = $"{effectiveRemoteBase}/{item.RelativeRemotePath}";
+
+                long fileSize = 0;
+                try { fileSize = new FileInfo(item.LocalPath).Length; } catch { }
+
+                // O(1) Remote Dictionary Skip Check
                 if (strategyMode == "SkipExisting")
                 {
-                    if (remoteIndex.TryGetValue(item.RelativeRemotePath, out long remoteSize) && remoteSize > 0 && remoteSize == fileSize)
+                    if (remoteIndex.TryGetValue(item.RelativeRemotePath, out long rSize) && fileSize > 0 && rSize == fileSize)
                     {
                         skippedCount++;
-                        logger.Report($"⏩ Skipped (Already Exists): {item.RelativeRemotePath}");
-                        ReportProgress(progress, "Uploading", fileName, i + 1, totalCount, totalBytesTransferred, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, 0, fileSize);
+                        logger.Report($"⏩ Skipped (Already Exists): {Path.GetFileName(item.LocalPath)}");
+                        ReportProgress(progress, "Uploading", Path.GetFileName(item.LocalPath), i + 1, totalCount, totalBytesTransferred, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, 0, fileSize);
                         continue;
                     }
                 }
 
-                // Deduplicated batched remote parent folder creation
-                string remoteParentDir = Path.GetDirectoryName(remoteTargetFile)?.Replace('\\', '/') ?? cleanRemoteBase;
-                if (createdDirs.Add(remoteParentDir))
+                // Batch directory creation
+                string remoteDir = Path.GetDirectoryName(remoteTargetFile)?.Replace('\\', '/') ?? cleanRemoteBase;
+                if (!createdDirs.Contains(remoteDir))
                 {
-                    await _adbService.CreateDirectoryAsync(serial, remoteParentDir);
+                    await _adbService.CreateDirectoryAsync(serial, remoteDir);
+                    createdDirs.Add(remoteDir);
                 }
 
-                logger.Report($"📤 Uploading: {item.RelativeRemotePath} -> {remoteTargetFile}");
+                string fileName = Path.GetFileName(item.LocalPath);
+                logger.Report($"📤 Uploading: {fileName} -> {remoteTargetFile}");
 
+                long currentFileTransferred = 0;
                 var fileBytesProgress = new Progress<long>(curBytes =>
                 {
-                    ReportProgress(progress, "Uploading", fileName, i + 1, totalCount, totalBytesTransferred + curBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, curBytes, fileSize);
+                    currentFileTransferred = curBytes;
+                    // Always report per-file progress immediately
+                    ReportProgress(progress, "Uploading", fileName, i + 1, totalCount, totalBytesTransferred + curBytes, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, curBytes, fileSize);
                 });
 
                 bool success = false;
                 for (int attempt = 1; attempt <= 3 && !success; attempt++)
                 {
-                    success = await _adbService.PushFileWithProgressAsync(serial, localFile, remoteTargetFile, fileSize, fileBytesProgress, ct);
+                    success = await _adbService.PushFileWithProgressAsync(serial, item.LocalPath, remoteTargetFile, fileSize, fileBytesProgress, ct);
                     if (!success && attempt < 3)
                     {
                         logger.Report($"⚠️ Retry {attempt}/3 for: {fileName}");
@@ -323,13 +356,13 @@ namespace openTransferWPF.Services
                 }
                 else
                 {
-                    logger.Report($"❌ Upload Failed: {fileName}");
+                    logger.Report($"❌ Failed to upload: {fileName}");
                 }
 
                 long nowTicks = Stopwatch.GetTimestamp();
                 if (nowTicks - lastReportTicks >= reportIntervalTicks || i == totalCount - 1)
                 {
-                    ReportProgress(progress, "Uploading", fileName, i + 1, totalCount, totalBytesTransferred, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, fileSize, fileSize);
+                    ReportProgress(progress, "Uploading", fileName, i + 1, totalCount, totalBytesTransferred, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, uploadedCount, fileSize, fileSize);
                     lastReportTicks = nowTicks;
                 }
             }
@@ -345,6 +378,7 @@ namespace openTransferWPF.Services
             int currentIndex,
             int totalCount,
             long bytesTransferred,
+            long totalBytes,
             double elapsedSeconds,
             int skippedCount,
             int copiedCount,
@@ -353,7 +387,12 @@ namespace openTransferWPF.Services
         {
             double speedMb = elapsedSeconds > 0 ? (bytesTransferred / (1024.0 * 1024.0)) / elapsedSeconds : 0;
             int eta = 0;
-            if (currentIndex < totalCount && speedMb > 0)
+            if (speedMb > 0 && totalBytes > bytesTransferred)
+            {
+                double remainingMb = (totalBytes - bytesTransferred) / (1024.0 * 1024.0);
+                eta = (int)(remainingMb / speedMb);
+            }
+            else if (currentIndex < totalCount && speedMb > 0)
             {
                 int remainingFiles = totalCount - currentIndex;
                 eta = (int)(remainingFiles * 0.5);
@@ -366,6 +405,7 @@ namespace openTransferWPF.Services
                 CurrentFileIndex = currentIndex,
                 TotalFileCount = totalCount,
                 BytesTransferred = bytesTransferred,
+                TotalBytes = totalBytes,
                 SpeedMbPerSec = speedMb,
                 EtaSeconds = eta,
                 SkippedCount = skippedCount,

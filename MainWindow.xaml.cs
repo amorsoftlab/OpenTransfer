@@ -803,6 +803,15 @@ namespace openTransferWPF
                 _ => 0
             };
             CmbLanguage.SelectedIndex = s.Language == "Malayalam" ? 1 : 0;
+            CmbFolderColor.SelectedIndex = s.FolderColor switch
+            {
+                "Blue" => 1,
+                "Green" => 2,
+                "Purple" => 3,
+                "Red" => 4,
+                "Orange" => 5,
+                _ => 0
+            };
 
             // Transfers
             CmbConflict.SelectedIndex = s.ConflictResolution switch
@@ -859,6 +868,15 @@ namespace openTransferWPF
             ChkPreserveDate.IsChecked = s.PreserveModifiedDate;
             ChkPreserveStructure.IsChecked = s.PreserveFolderStructure;
             ChkCreateMissing.IsChecked = s.CreateMissingFolders;
+            ChkAutoSplit.IsChecked = s.AutoSplitOnTransfer;
+            CmbAutoSplitSize.SelectedIndex = s.AutoSplitBatchSize switch
+            {
+                100 => 0,
+                250 => 1,
+                1000 => 3,
+                _ => 2
+            };
+            CmbAutoSplitNaming.SelectedIndex = s.AutoSplitNamingFormat == "Day" ? 1 : 0;
 
             // Advanced
             TxtCustomAdbPath.Text = s.CustomAdbPath;
@@ -913,6 +931,15 @@ namespace openTransferWPF
                     _ => "System"
                 },
                 Language = CmbLanguage.SelectedIndex == 1 ? "Malayalam" : "English",
+                FolderColor = CmbFolderColor.SelectedIndex switch
+                {
+                    1 => "Blue",
+                    2 => "Green",
+                    3 => "Purple",
+                    4 => "Red",
+                    5 => "Orange",
+                    _ => "Yellow"
+                },
 
                 // Transfers
                 ConflictResolution = CmbConflict.SelectedIndex switch
@@ -969,6 +996,15 @@ namespace openTransferWPF
                 PreserveModifiedDate = ChkPreserveDate.IsChecked == true,
                 PreserveFolderStructure = ChkPreserveStructure.IsChecked == true,
                 CreateMissingFolders = ChkCreateMissing.IsChecked == true,
+                AutoSplitOnTransfer = ChkAutoSplit.IsChecked == true,
+                AutoSplitBatchSize = CmbAutoSplitSize.SelectedIndex switch
+                {
+                    0 => 100,
+                    1 => 250,
+                    3 => 1000,
+                    _ => 500
+                },
+                AutoSplitNamingFormat = CmbAutoSplitNaming.SelectedIndex == 1 ? "Day" : "Photo",
 
                 // Advanced
                 CustomAdbPath = TxtCustomAdbPath.Text.Trim(),
@@ -1036,6 +1072,24 @@ namespace openTransferWPF
             {
                 MessageBox.Show($"You are running the latest version of OpenTransfer (v{UpdateService.CurrentAppVersion}).", "No Updates Available", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void BtnInstagram_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://www.instagram.com/magical_world_i_see/") { UseShellExecute = true });
+            }
+            catch { }
+        }
+
+        private void BtnGitHubProfile_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/amorsoftlab/OpenTransfer") { UseShellExecute = true });
+            }
+            catch { }
         }
     }
 }

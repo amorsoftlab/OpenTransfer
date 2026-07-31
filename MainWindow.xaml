@@ -474,6 +474,16 @@
                                             <ComboBoxItem Content="English"/>
                                             <ComboBoxItem Content="Malayalam (Future)"/>
                                         </ComboBox>
+
+                                        <TextBlock Text="Folder Accent Color:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbFolderColor" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
+                                            <ComboBoxItem Content="Classic Yellow"/>
+                                            <ComboBoxItem Content="Ocean Blue"/>
+                                            <ComboBoxItem Content="Emerald Green"/>
+                                            <ComboBoxItem Content="Royal Purple"/>
+                                            <ComboBoxItem Content="Crimson Red"/>
+                                            <ComboBoxItem Content="Vivid Orange"/>
+                                        </ComboBox>
                                     </StackPanel>
                                 </ScrollViewer>
 
@@ -566,6 +576,35 @@
                                         <CheckBox x:Name="ChkPreserveDate" Content="Preserve modified date" IsChecked="True" Margin="0,0,0,6"/>
                                         <CheckBox x:Name="ChkPreserveStructure" Content="Preserve folder structure" IsChecked="True" Margin="0,0,0,6"/>
                                         <CheckBox x:Name="ChkCreateMissing" Content="Create missing folders automatically" IsChecked="True" Margin="0,0,0,6"/>
+
+                                        <!-- AUTO-SPLIT ON TRANSFER CARD -->
+                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,10,0,6">
+                                            <StackPanel>
+                                                <CheckBox x:Name="ChkAutoSplit" Content="⚡ Automatically split files into batch subfolders on transfer" IsChecked="False" Margin="0,0,0,8" FontWeight="SemiBold"/>
+                                                <Grid Margin="20,2,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <TextBlock Text="Batch Size (Files/Folder):" FontSize="11.5" Margin="0,0,0,4" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                        <ComboBox x:Name="CmbAutoSplitSize" SelectedIndex="2" Padding="6,3">
+                                                            <ComboBoxItem Content="100 files"/>
+                                                            <ComboBoxItem Content="250 files"/>
+                                                            <ComboBoxItem Content="500 files"/>
+                                                            <ComboBoxItem Content="1000 files"/>
+                                                        </ComboBox>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                        <TextBlock Text="Folder Naming Style:" FontSize="11.5" Margin="0,0,0,4" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                        <ComboBox x:Name="CmbAutoSplitNaming" SelectedIndex="0" Padding="6,3">
+                                                            <ComboBoxItem Content="photo-1, photo-2..."/>
+                                                            <ComboBoxItem Content="day 1-1, day 1-2..."/>
+                                                        </ComboBox>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </ScrollViewer>
 
@@ -608,9 +647,31 @@
 
                                         <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
                                             <StackPanel>
-                                                <TextBlock Text="Version: 1.2.0 (Release)" FontSize="12" Margin="0,0,0,4"/>
+                                                <TextBlock Text="Version: 1.2.1" FontSize="12" Margin="0,0,0,4"/>
                                                 <TextBlock Text="Build: 2026.07.31" FontSize="12" Margin="0,0,0,4"/>
                                                 <TextBlock Text="ADB Binary: Platform Tools 34.0.5" FontSize="12"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- DEVELOPER INFORMATION CARD -->
+                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="14" CornerRadius="8" Margin="0,0,0,16">
+                                            <StackPanel>
+                                                <TextBlock Text="👨‍💻 Developer Information" Style="{StaticResource FluxBodySm}" FontWeight="Bold" Foreground="{StaticResource FluxOnSurface}" Margin="0,0,0,8"/>
+                                                
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="👤 Developer:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="Jaseem Mhd" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurface}"/>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="📸 Instagram:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="magical_world_i_see" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnInstagram_Click"/>
+                                                </StackPanel>
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="🐙 GitHub:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="github.com/amorsoftlab/OpenTransfer" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnGitHubProfile_Click"/>
+                                                </StackPanel>
                                             </StackPanel>
                                         </Border>
 

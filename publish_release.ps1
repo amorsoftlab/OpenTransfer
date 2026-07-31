@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 Set-Location $projectDir
 
-$version = "1.2.0"
+$version = "1.2.1"
 $tag = "v$version"
 $repoUrl = "https://github.com/amorsoftlab/OpenTransfer.git"
 

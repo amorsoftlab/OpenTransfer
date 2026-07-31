@@ -21,16 +21,36 @@ namespace openTransferWPF.Dialogs
             _cts = cts;
         }
 
+        private static string FormatBytes(long bytes)
+        {
+            if (bytes <= 0) return "0 B";
+            string[] suffixes = { "B", "KB", "MB", "GB", "TB" };
+            int i = 0;
+            double dblBytes = bytes;
+            while (dblBytes >= 1024 && i < suffixes.Length - 1)
+            {
+                dblBytes /= 1024;
+                i++;
+            }
+            return $"{dblBytes:0.##} {suffixes[i]}";
+        }
+
         public void UpdateProgress(CopyEngineProgress p)
         {
             // Current File Progress
             PrgFileBar.Value = p.CurrentFilePercent;
             TxtCurrentFilePercent.Text = $"{p.CurrentFilePercent:0}%";
+            TxtCurrentFileBytes.Text = $"{FormatBytes(p.CurrentFileBytesTransferred)} / {FormatBytes(p.CurrentFileTotalBytes)}";
             TxtCurrentFile.Text = string.IsNullOrEmpty(p.CurrentFileName) ? "Preparing transfer..." : p.CurrentFileName;
 
-            // Total Progress
+            // Total Progress & Size Stats
             PrgBar.Value = p.TotalPercent;
             TxtTotalPercent.Text = $"{p.TotalPercent:0}%";
+            TxtTotalBytes.Text = $"{FormatBytes(p.BytesTransferred)} / {FormatBytes(p.TotalBytes)}";
+
+            long remainingBytes = Math.Max(0, p.TotalBytes - p.BytesTransferred);
+            TxtRemainingSize.Text = $"📦 Remaining: {FormatBytes(remainingBytes)}";
+            TxtFileCountRatio.Text = p.TotalFileCount > 0 ? $"{p.CurrentFileIndex} / {p.TotalFileCount} items" : "Scanning...";
 
             // Headers & Subheaders
             TxtSubHeader.Text = p.TotalFileCount > 0 ? $"({p.CurrentFileIndex}/{p.TotalFileCount} items)" : "Scanning files...";

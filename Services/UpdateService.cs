@@ -23,7 +23,7 @@ namespace openTransferWPF.Services
         private static readonly Lazy<UpdateService> _instance = new(() => new UpdateService());
         public static UpdateService Instance => _instance.Value;
 
-        public const string CurrentAppVersion = "1.2.0";
+        public const string CurrentAppVersion = "1.2.1";
         private const string GitHubApiUrl = "https://api.github.com/repos/amorsoftlab/OpenTransfer/releases/latest";
 
         private readonly HttpClient _httpClient;

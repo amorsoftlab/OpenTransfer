@@ -13,6 +13,7 @@ namespace openTransferWPF.Models
         // --- APPEARANCE ---
         public string Theme { get; set; } = "System"; // "System", "Light", "Dark"
         public string AccentColor { get; set; } = "#005fb8";
+        public string FolderColor { get; set; } = "Yellow"; // "Yellow", "Blue", "Green", "Purple", "Red", "Orange"
         public string Language { get; set; } = "English"; // "English", "Malayalam"
 
         // --- TRANSFERS ---
@@ -36,6 +37,11 @@ namespace openTransferWPF.Models
         public bool PreserveModifiedDate { get; set; } = true;
         public bool PreserveFolderStructure { get; set; } = true;
         public bool CreateMissingFolders { get; set; } = true;
+
+        // --- AUTO-SPLIT ON TRANSFER ---
+        public bool AutoSplitOnTransfer { get; set; } = false;
+        public int AutoSplitBatchSize { get; set; } = 500; // 100, 250, 500, 1000
+        public string AutoSplitNamingFormat { get; set; } = "Photo"; // "Photo" (photo-1, photo-2), "Day" (day 1-1, day 1-2)
 
         // --- ADVANCED ---
         public string CustomAdbPath { get; set; } = string.Empty;
