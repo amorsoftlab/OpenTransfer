@@ -79,11 +79,16 @@ if (Get-Command "gh" -ErrorAction SilentlyContinue) {
     $setupFile = Get-ChildItem "$projectDir\release_output\*" | Select-Object -First 1
     if ($setupFile) {
         try {
-            gh release create $tag $setupFile.FullName --title "OpenTransfer $tag" --notes "Native High-Speed Android USB File Transfer Application Release $tag" --clobber
+            gh release create $tag $setupFile.FullName --title "OpenTransfer $tag" --notes "Native High-Speed Android USB File Transfer Application Release $tag" 2>$null
             Write-Host "🎉 GitHub Release $tag created with asset $($setupFile.Name)!" -ForegroundColor Green
         } catch {
-            Write-Host "⚠️ Could not auto-upload via gh CLI. Tag $tag is pushed to GitHub." -ForegroundColor Yellow
-            Write-Host "You can upload $($setupFile.Name) at https://github.com/amorsoftlab/OpenTransfer/releases/tag/$tag" -ForegroundColor Cyan
+            try {
+                gh release upload $tag $setupFile.FullName --clobber
+                Write-Host "🎉 GitHub Release $tag updated with asset $($setupFile.Name)!" -ForegroundColor Green
+            } catch {
+                Write-Host "⚠️ Could not auto-upload via gh CLI. Tag $tag is pushed to GitHub." -ForegroundColor Yellow
+                Write-Host "You can upload $($setupFile.Name) at https://github.com/amorsoftlab/OpenTransfer/releases/tag/$tag" -ForegroundColor Cyan
+            }
         }
     }
 } else {
