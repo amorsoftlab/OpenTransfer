@@ -61,7 +61,6 @@ Write-Host "`n[4/5] Committing & Pushing to GitHub..." -ForegroundColor Yellow
 git add .
 git commit -m "Release ${tag}: OpenTransfer v$version build and source code"
 git branch -M main
-git pull origin main --rebase -ErrorAction SilentlyContinue
 git push -u origin main -f
 
 # 5. Create GitHub Release & Upload Asset
