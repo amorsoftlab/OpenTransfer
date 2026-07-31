@@ -57,19 +57,22 @@ if ($remotes -notmatch "amorsoftlab/OpenTransfer") {
 }
 
 # 4. Commit and Push Code
-Write-Host "`n[4/5] Committing & Pushing to GitHub..." -ForegroundColor Yellow
-git add .
+Write-Host "`n[4/5] Syncing & Pushing Source Code to GitHub..." -ForegroundColor Yellow
+git add -A
 $status = git status --porcelain
 if ($status) {
-    git commit -m "Release ${tag}: OpenTransfer v$version build and source code"
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    git commit -m "Update ${tag} ($timestamp): Sync source code & build output"
+    Write-Host "✅ Committed latest source code changes." -ForegroundColor Green
 } else {
-    Write-Host "Working tree clean, skipping commit." -ForegroundColor Gray
+    Write-Host "Working tree clean, all source files are up to date." -ForegroundColor Gray
 }
 git branch -M main
+Write-Host "Pushing main branch to $repoUrl..." -ForegroundColor Gray
 git push -u origin main -f
 
 # Push Git Release Tag
-Write-Host "Pushing git tag $tag to origin..." -ForegroundColor Gray
+Write-Host "Pushing git release tag $tag to origin..." -ForegroundColor Gray
 git tag -f $tag
 git push origin $tag -f
 
