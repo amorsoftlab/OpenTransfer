@@ -1,0 +1,115 @@
+<Window x:Class="openTransferWPF.Dialogs.TransferProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="File Transfer" Height="360" Width="460"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource FluxSurfaceContainerLowest}" Foreground="{StaticResource FluxOnSurface}"
+        FontFamily="Inter, Segoe UI, sans-serif">
+
+    <Grid Margin="24">
+        <!-- ═══════════════════════════════════════════════════════════════
+             STATE 1: ACTIVE TRANSFER PROGRESS
+             ═══════════════════════════════════════════════════════════════ -->
+        <Grid x:Name="PnlProgressState" Visibility="Visible">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Title & Icon -->
+                <RowDefinition Height="Auto"/> <!-- Current File Section -->
+                <RowDefinition Height="Auto"/> <!-- Total Progress Section -->
+                <RowDefinition Height="*"/>    <!-- Stats Footer -->
+                <RowDefinition Height="Auto"/> <!-- Buttons -->
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtHeader" Text="Copying files..."
+                               Style="{StaticResource FluxTitleMd}" FontWeight="Bold" FontSize="18"/>
+                    <TextBlock x:Name="TxtSubHeader" Text="Android Device ↔ PC"
+                               Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}" Margin="0,2,0,0"/>
+                </StackPanel>
+                <TextBlock Text="📄" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top"
+                           Foreground="{StaticResource FluxPrimaryContainer}" Opacity="0.8"/>
+            </Grid>
+
+            <!-- Current File Progress Section -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,14">
+                <Grid Margin="0,0,0,4">
+                    <TextBlock x:Name="TxtCurrentFile" Text="Preparing transfer..."
+                               Style="{StaticResource FluxBodySm}" FontWeight="Medium"
+                               Foreground="{StaticResource FluxOnSurface}" TextTrimming="CharacterEllipsis" Margin="0,0,50,0"/>
+                    <TextBlock x:Name="TxtCurrentFilePercent" Text="0%"
+                               Style="{StaticResource FluxBodySm}" FontWeight="SemiBold"
+                               Foreground="{StaticResource FluxOnSurfaceVariant}" HorizontalAlignment="Right"/>
+                </Grid>
+                <ProgressBar x:Name="PrgFileBar" Style="{StaticResource FluxProgressBar}" Height="4" Margin="0,0,0,4"/>
+                <TextBlock Text="Current file progress" Style="{StaticResource FluxBodySm}"
+                           FontSize="11" Foreground="{StaticResource FluxOutline}"/>
+            </StackPanel>
+
+            <!-- Total Progress Section -->
+            <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                <Grid Margin="0,0,0,4">
+                    <TextBlock Text="Total Progress" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold"
+                               Foreground="{StaticResource FluxOnSurface}"/>
+                    <TextBlock x:Name="TxtTotalPercent" Text="0%" Style="{StaticResource FluxBodySm}"
+                               FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurfaceVariant}" HorizontalAlignment="Right"/>
+                </Grid>
+                <ProgressBar x:Name="PrgBar" Style="{StaticResource FluxProgressBar}" Height="5"/>
+            </StackPanel>
+
+            <!-- Speed & ETA Stats -->
+            <Grid Grid.Row="3" VerticalAlignment="Center" Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock x:Name="TxtSpeed" Text="⚡ 0 MB/s" Style="{StaticResource FluxBodySm}"
+                               FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Margin="0,0,12,0"/>
+                    <TextBlock x:Name="TxtSkipped" Text="✨ 0 Skipped" Style="{StaticResource FluxBodySm}"
+                               Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1" x:Name="TxtEta" Text="Calculating..." Style="{StaticResource FluxBodySm}"
+                           Foreground="{StaticResource FluxOnSurfaceVariant}" HorizontalAlignment="Right"/>
+            </Grid>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="BtnPause" Content="Pause" Click="BtnPause_Click" Width="90" Height="32"
+                        Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}" Padding="0"/>
+                <Button x:Name="BtnCancel" Content="Cancel" Click="BtnCancel_Click" Width="90" Height="32"
+                        Style="{StaticResource FluxPrimaryButton}" Padding="0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             STATE 2: TRANSFER COMPLETE (Matching Reference Design #2)
+             ═══════════════════════════════════════════════════════════════ -->
+        <Grid x:Name="PnlCompleteState" Visibility="Collapsed" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center">
+                <!-- Checkmark Icon Box -->
+                <Border Width="64" Height="64" Background="{StaticResource FluxSurfaceContainer}"
+                        CornerRadius="16" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <TextBlock Text="✓" FontSize="32" FontWeight="Bold" Foreground="{StaticResource FluxPrimaryContainer}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Title & Description -->
+                <TextBlock Text="Transfer Complete" Style="{StaticResource FluxHeadlineMd}"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock x:Name="TxtCompleteMessage"
+                           Text="All selected files have been successfully transferred to your local computer."
+                           Style="{StaticResource FluxBodyMd}" Foreground="{StaticResource FluxOnSurfaceVariant}"
+                           TextAlignment="Center" TextWrapping="Wrap" MaxWidth="360" Margin="0,0,0,24"/>
+
+                <!-- Action Buttons -->
+                <Button x:Name="BtnOpenFolder" Content="📁 Open Folder" Click="BtnOpenFolder_Click"
+                        Style="{StaticResource FluxPrimaryButton}" Width="280" Height="38" Margin="0,0,0,10"/>
+                <Button Content="Done" Click="BtnDone_Click"
+                        Style="{StaticResource FluxGhostButton}" Width="280" Height="36"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

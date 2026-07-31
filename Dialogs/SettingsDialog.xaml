@@ -1,0 +1,256 @@
+<Window x:Class="openTransferWPF.Dialogs.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings" Icon="../Assets/logo.ico" Height="540" Width="760"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource FluxSurface}" Foreground="{StaticResource FluxOnSurface}"
+        FontFamily="Inter, Segoe UI, sans-serif">
+
+    <Window.Resources>
+        <Style x:Key="SettingsTabButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+            <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TabBorder" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#10B981"/> <!-- Vibrant Green Hover -->
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT SIDEBAR CATEGORY MENU -->
+        <Border Grid.Column="0" Grid.Row="0" Background="{StaticResource FluxSurfaceContainerLow}"
+                CornerRadius="8" Margin="0,0,12,0" Padding="6">
+            <StackPanel x:Name="PnlCategoryMenu">
+                <Button x:Name="TabGeneral" Content="⚙️  General" Click="TabButton_Click" Tag="0"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabAppearance" Content="🎨  Appearance" Click="TabButton_Click" Tag="1"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabTransfers" Content="🚀  Transfers" Click="TabButton_Click" Tag="2"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabDevice" Content="📱  Device" Click="TabButton_Click" Tag="3"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabExplorer" Content="📁  Explorer" Click="TabButton_Click" Tag="4"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabAdvanced" Content="🛠️  Advanced" Click="TabButton_Click" Tag="5"
+                        Style="{StaticResource SettingsTabButton}"/>
+                <Button x:Name="TabAbout" Content="ℹ️  About" Click="TabButton_Click" Tag="6"
+                        Style="{StaticResource SettingsTabButton}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- RIGHT CONTENT PANELS -->
+        <Border Grid.Column="1" Grid.Row="0" Background="{StaticResource FluxSurfaceContainerLowest}"
+                CornerRadius="8" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1" Padding="20">
+            <Grid>
+                <!-- 0. GENERAL PANEL -->
+                <ScrollViewer x:Name="PnlGeneral" Visibility="Visible" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Startup &amp; Background Behavior" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="ChkLaunchStartup" Content="Launch at Windows startup" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkMinimizeTray" Content="Minimize to system tray on close" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkAutoDetect" Content="Auto detect Android USB devices" IsChecked="True" Margin="0,0,0,10"/>
+                        <CheckBox x:Name="ChkAutoReconnect" Content="Auto reconnect device when plugged in" IsChecked="True" Margin="0,0,0,10"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 1. APPEARANCE PANEL -->
+                <ScrollViewer x:Name="PnlAppearance" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Theme Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Application Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbTheme" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
+                            <ComboBoxItem Content="System Default"/>
+                            <ComboBoxItem Content="Light Theme"/>
+                            <ComboBoxItem Content="Dark Theme"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Language:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbLanguage" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
+                            <ComboBoxItem Content="English"/>
+                            <ComboBoxItem Content="Malayalam (Future)"/>
+                        </ComboBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 2. TRANSFERS PANEL -->
+                <ScrollViewer x:Name="PnlTransfers" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="File Transfer &amp; Conflict Policies" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        
+                        <TextBlock Text="Conflict Resolution (When File Exists):" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbConflict" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="Ask Every Time"/>
+                            <ComboBoxItem Content="Skip Existing (Default)"/>
+                            <ComboBoxItem Content="Replace Existing"/>
+                            <ComboBoxItem Content="Rename Automatically"/>
+                        </ComboBox>
+
+                        <TextBlock Text="File Compare Method:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbCompareMethod" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="Filename Only"/>
+                            <ComboBoxItem Content="Filename + Size (Default)"/>
+                            <ComboBoxItem Content="Filename + Size + Modified Date"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Transfer Performance Mode:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbTransferMode" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="Maximum Speed"/>
+                            <ComboBoxItem Content="Balanced (Default)"/>
+                            <ComboBoxItem Content="Maximum Compatibility"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Buffer Size:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbBufferSize" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="Auto (Recommended)"/>
+                            <ComboBoxItem Content="512 KB"/>
+                            <ComboBoxItem Content="1 MB"/>
+                            <ComboBoxItem Content="2 MB"/>
+                            <ComboBoxItem Content="4 MB"/>
+                            <ComboBoxItem Content="8 MB"/>
+                        </ComboBox>
+
+                        <CheckBox x:Name="ChkVerifyCopied" Content="Verify copied files after transfer" IsChecked="True" Margin="0,0,0,8"/>
+                        <CheckBox x:Name="ChkRetryFailed" Content="Retry failed transfers automatically" IsChecked="True" Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="Retry Count:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="CmbRetryCount" SelectedIndex="1" Width="80" Padding="6,2">
+                                <ComboBoxItem Content="1"/>
+                                <ComboBoxItem Content="3"/>
+                                <ComboBoxItem Content="5"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 3. DEVICE PANEL -->
+                <ScrollViewer x:Name="PnlDevice" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Device &amp; Storage Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Default Storage Location:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbDefaultStorage" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
+                            <ComboBoxItem Content="Internal Storage (/sdcard)"/>
+                            <ComboBoxItem Content="SD Card"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Auto Refresh Device Polling Interval:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbRefreshInterval" SelectedIndex="1" Margin="0,0,0,16" Padding="8,4">
+                            <ComboBoxItem Content="1 sec"/>
+                            <ComboBoxItem Content="3 sec (Default)"/>
+                            <ComboBoxItem Content="5 sec"/>
+                        </ComboBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 4. EXPLORER PANEL -->
+                <ScrollViewer x:Name="PnlExplorer" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="File Explorer Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="Default Startup View:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbDefaultView" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="Details (List View)"/>
+                            <ComboBoxItem Content="Large Icons (Grid View)"/>
+                        </ComboBox>
+
+                        <CheckBox x:Name="ChkShowHidden" Content="Show hidden files and folders" Margin="0,0,0,8"/>
+                        <CheckBox x:Name="ChkShowExtensions" Content="Show file extensions" IsChecked="True" Margin="0,0,0,8"/>
+                        <CheckBox x:Name="ChkShowFolderSizes" Content="Show folder sizes (slower)" Margin="0,0,0,14"/>
+
+                        <TextBlock Text="Copy Behavior:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <CheckBox x:Name="ChkPreserveDate" Content="Preserve modified date" IsChecked="True" Margin="0,0,0,6"/>
+                        <CheckBox x:Name="ChkPreserveStructure" Content="Preserve folder structure" IsChecked="True" Margin="0,0,0,6"/>
+                        <CheckBox x:Name="ChkCreateMissing" Content="Create missing folders automatically" IsChecked="True" Margin="0,0,0,6"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 5. ADVANCED PANEL -->
+                <ScrollViewer x:Name="PnlAdvanced" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Advanced ADB Configuration" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="ADB Executable Path:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TxtCustomAdbPath" Padding="8,6" FontSize="12"/>
+                            <Button Grid.Column="1" Content="Browse..." Click="BtnBrowseAdb_Click" Margin="8,0,0,0" Padding="12,4" Style="{StaticResource FluxGhostButton}"/>
+                        </Grid>
+
+                        <TextBlock Text="ADB Operation Timeout:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbAdbTimeout" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
+                            <ComboBoxItem Content="30 sec (Default)"/>
+                            <ComboBoxItem Content="60 sec"/>
+                            <ComboBoxItem Content="120 sec"/>
+                        </ComboBox>
+
+                        <CheckBox x:Name="ChkDebugLogging" Content="Enable Debug Logging" Margin="0,0,0,6"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 6. ABOUT PANEL -->
+                <ScrollViewer x:Name="PnlAbout" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <Image Source="../Assets/logo.png" Width="48" Height="48" Margin="0,0,12,0"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="openTransferWPF" Style="{StaticResource FluxTitleMd}" FontWeight="Bold"/>
+                                <TextBlock Text="Native High-Speed Android USB File Transfer" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOutline}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Version: 1.2.0 (Release)" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="Build: 2026.07.31-WPF" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="TxtAdbVersionInfo" Text="ADB Binary: Platform Tools 34.0.5" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Content="📁 Open Logs Folder" Click="BtnOpenLogsFolder_Click" Padding="12,6" Style="{StaticResource FluxGhostButton}" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- BOTTOM BUTTON BAR -->
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancel" Click="BtnCancel_Click" Width="90" Height="32" Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}"/>
+            <Button Content="Save Settings" Click="BtnSave_Click" Width="120" Height="32" Style="{StaticResource FluxPrimaryButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>
