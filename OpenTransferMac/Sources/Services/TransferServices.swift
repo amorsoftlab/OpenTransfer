@@ -34,7 +34,7 @@ public class LoggerService: ObservableObject {
     @Published public var logs: [String] = []
 
     private init() {
-        log("OpenTransfer macOS (v1.2.1) started.")
+        log("OpenTransfer macOS (v1.2.2) started.")
         // Check for updates silently in the background on every launch
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             UpdateService.shared.checkForUpdatesInBackground()

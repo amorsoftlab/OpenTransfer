@@ -6,15 +6,15 @@
         <description>OpenTransfer macOS Latest Releases</description>
         <language>en</language>
         <item>
-            <title>OpenTransfer 1.2.1</title>
-            <pubDate>Fri, 31 Jul 2026 05:15:18 +0000</pubDate>
-            <sparkle:version>1.2.1</sparkle:version>
-            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
-            <sparkle:releaseNotesLink>https://github.com/amorsoftlab/OpenTransfer/releases/tag/v1.2.1</sparkle:releaseNotesLink>
+            <title>OpenTransfer 1.2.2</title>
+            <pubDate>Fri, 31 Jul 2026 05:27:51 +0000</pubDate>
+            <sparkle:version>1.2.2</sparkle:version>
+            <sparkle:shortVersionString>1.2.2</sparkle:shortVersionString>
+            <sparkle:releaseNotesLink>https://github.com/amorsoftlab/OpenTransfer/releases/tag/v1.2.2</sparkle:releaseNotesLink>
             <enclosure
-                url="https://github.com/amorsoftlab/OpenTransfer/releases/download/v1.2.1/OpenTransfer_v1.2.1_mac.pkg"
-                sparkle:version="1.2.1"
-                length="359564"
+                url="https://github.com/amorsoftlab/OpenTransfer/releases/download/v1.2.2/OpenTransfer_v1.2.2_mac.pkg"
+                sparkle:version="1.2.2"
+                length="1176365"
                 type="application/octet-stream"/>
         </item>
     </channel>

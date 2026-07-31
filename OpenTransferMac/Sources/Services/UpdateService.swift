@@ -7,7 +7,7 @@ public class UpdateService {
     public static let shared = UpdateService()
 
     // The current version of this app build (keep in sync with build_release_mac.sh)
-    public static let currentVersion = "1.2.1"
+    public static let currentVersion = "1.2.2"
 
     private let githubApiURL = "https://api.github.com/repos/amorsoftlab/OpenTransfer/releases/latest"
     private let releasesPageURL = "https://github.com/amorsoftlab/OpenTransfer/releases/latest"

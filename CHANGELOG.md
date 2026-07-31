@@ -4,6 +4,24 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.2] - 2026-07-31
+
+### 🎨 Added
+- **macOS App Icon**: `Assets/logo.png` → full `AppIcon.icns` (10 resolutions: 16px–1024px). Icon now shows in Dock, Launchpad, Finder, and App Switcher.
+- **Folder Icon Pack Selector**: 5 packs (macOS Native, Colorful, Fluent, Minimal, OpenTransfer) in `Settings → Appearance` with live icon preview strips.
+- **Grid View / List View Toggle**: Segmented button in toolbar to instantly switch between List (Table) and Icon Grid layouts.
+- **macOS Release Script** (`build_release_mac.sh`): Full automated pipeline — Swift build → `.app` bundle → `.icns` icon → `.pkg` installer → GitHub Release upload.
+- **Auto-Update System**: `UpdateService` silently checks GitHub Releases API on launch; shows native alert if a newer version is available. Manual check in `Settings → About`.
+
+### 🛠️ Fixed & Improved
+- **Git repo cleaned**: `.build/` and `mac_output/` excluded from git history via `.gitignore`. Repo size reduced from ~1.2 GB to <5 MB.
+- **Nested Folder Copy Bug Fixed**: `Panchayth/Panchayth` duplication resolved — ADB push now uses `source/.` to merge directory contents.
+- **Drag & Drop Overlay Stuck Fixed**: `.allowsHitTesting(false)` prevents overlay from intercepting mouse events.
+- **Row Click Selection Fixed**: Click anywhere on a row to select; double-click anywhere to open folders.
+- **Conflict Resolution Dialog**: Replace All / Skip Existing / Cancel prompt when dropped files already exist.
+
+---
+
 ## [1.2.1] - 2026-07-31
 
 ### 🎨 Added

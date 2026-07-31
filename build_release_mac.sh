@@ -48,6 +48,8 @@ echo "   ✅ Version strings updated to $VERSION."
 # ── Step 2: Build the Swift CLI binary (release mode) ────────
 echo ""
 echo "[2/6] 🔨 Building Swift release binary..."
+# Fix permissions first in case previous build left root-owned files
+chmod -R 755 "$BUILD_DIR" 2>/dev/null || true
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
@@ -73,6 +75,34 @@ mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 cp "$BINARY" "$MACOS_DIR/$APP_NAME"
 chmod +x "$MACOS_DIR/$APP_NAME"
 
+# ── Generate .icns from Assets/logo.png ───────────────────────
+LOGO_SRC="$SCRIPT_DIR/Assets/logo.png"
+ICONSET_DIR="$BUILD_DIR/AppIcon.iconset"
+ICNS_PATH="$RESOURCES_DIR/AppIcon.icns"
+
+if [ -f "$LOGO_SRC" ]; then
+  echo "   🎨 Generating AppIcon.icns from Assets/logo.png..."
+  rm -rf "$ICONSET_DIR"
+  mkdir -p "$ICONSET_DIR"
+
+  sips -z 16 16     "$LOGO_SRC" --out "$ICONSET_DIR/icon_16x16.png"      &>/dev/null
+  sips -z 32 32     "$LOGO_SRC" --out "$ICONSET_DIR/icon_16x16@2x.png"   &>/dev/null
+  sips -z 32 32     "$LOGO_SRC" --out "$ICONSET_DIR/icon_32x32.png"      &>/dev/null
+  sips -z 64 64     "$LOGO_SRC" --out "$ICONSET_DIR/icon_32x32@2x.png"   &>/dev/null
+  sips -z 128 128   "$LOGO_SRC" --out "$ICONSET_DIR/icon_128x128.png"    &>/dev/null
+  sips -z 256 256   "$LOGO_SRC" --out "$ICONSET_DIR/icon_128x128@2x.png" &>/dev/null
+  sips -z 256 256   "$LOGO_SRC" --out "$ICONSET_DIR/icon_256x256.png"    &>/dev/null
+  sips -z 512 512   "$LOGO_SRC" --out "$ICONSET_DIR/icon_256x256@2x.png" &>/dev/null
+  sips -z 512 512   "$LOGO_SRC" --out "$ICONSET_DIR/icon_512x512.png"    &>/dev/null
+  sips -z 1024 1024 "$LOGO_SRC" --out "$ICONSET_DIR/icon_512x512@2x.png" &>/dev/null
+
+  iconutil -c icns "$ICONSET_DIR" -o "$ICNS_PATH"
+  rm -rf "$ICONSET_DIR"
+  echo "   ✅ AppIcon.icns created."
+else
+  echo "   ⚠️  Assets/logo.png not found — skipping icon."
+fi
+
 cat > "$CONTENTS/Info.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -92,6 +122,8 @@ cat > "$CONTENTS/Info.plist" << PLIST
     <string>$VERSION</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>LSMinimumSystemVersion</key>
@@ -103,6 +135,7 @@ cat > "$CONTENTS/Info.plist" << PLIST
 </dict>
 </plist>
 PLIST
+
 
 echo "   ✅ .app bundle created at $APP_BUNDLE"
 
