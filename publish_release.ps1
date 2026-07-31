@@ -16,10 +16,15 @@ Write-Host "==================================================" -ForegroundColor
 # 1. Clean & Publish WPF App
 Write-Host "`n[1/5] Publishing WPF Binaries (win-x64)..." -ForegroundColor Yellow
 if (Test-Path "$projectDir\publish") { Remove-Item "$projectDir\publish" -Recurse -Force }
-if (Test-Path "$projectDir\release_output") { Remove-Item "$projectDir\release_output" -Recurse -Force }
+if (Test-Path "$projectDir\output") { Remove-Item "$projectDir\output" -Recurse -Force }
 
 dotnet publish openTransferWPF.csproj -c Release -r win-x64 --self-contained false -o "$projectDir\publish"
 if ($LASTEXITCODE -ne 0) { Write-Error "dotnet publish failed!"; exit 1 }
+
+# Sync Version into installer.iss
+if (Test-Path "$projectDir\installer.iss") {
+    (Get-Content "$projectDir\installer.iss") -replace '#define MyAppVersion ".*"', "#define MyAppVersion ""$version""" | Set-Content "$projectDir\installer.iss"
+}
 
 # 2. Build Inno Setup Installer (.exe)
 Write-Host "`n[2/5] Compiling Inno Setup Installer (.exe)..." -ForegroundColor Yellow
@@ -39,12 +44,12 @@ foreach ($path in $isccPaths) {
 
 if ($isccPath) {
     & $isccPath "$projectDir\installer.iss"
-    Write-Host "✅ Inno Setup Installer built successfully in release_output\" -ForegroundColor Green
+    Write-Host "✅ Inno Setup Installer built successfully in output\" -ForegroundColor Green
 } else {
     Write-Host "⚠️ ISCC.exe (Inno Setup Compiler) not found on system PATH." -ForegroundColor Yellow
-    Write-Host "Creating fallback Release Zip package in release_output\..." -ForegroundColor Yellow
-    New-Item -ItemType Directory -Force -Path "$projectDir\release_output" | Out-Null
-    Compress-Archive -Path "$projectDir\publish\*" -DestinationPath "$projectDir\release_output\OpenTransfer_v$version.zip" -Force
+    Write-Host "Creating fallback Release Zip package in output\..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Force -Path "$projectDir\output" | Out-Null
+    Compress-Archive -Path "$projectDir\publish\*" -DestinationPath "$projectDir\output\OpenTransfer_v$version.zip" -Force
 }
 
 # 3. Git Remote Check
@@ -79,7 +84,7 @@ git push origin $tag -f
 # 5. Create GitHub Release & Upload Asset
 Write-Host "`n[5/5] Creating GitHub Release ($tag)..." -ForegroundColor Yellow
 if (Get-Command "gh" -ErrorAction SilentlyContinue) {
-    $setupFile = Get-ChildItem "$projectDir\release_output\*" | Select-Object -First 1
+    $setupFile = Get-ChildItem "$projectDir\output\*" | Select-Object -First 1
     if ($setupFile) {
         try {
             gh release create $tag $setupFile.FullName --title "OpenTransfer $tag" --notes "Native High-Speed Android USB File Transfer Application Release $tag" 2>$null
@@ -97,7 +102,7 @@ if (Get-Command "gh" -ErrorAction SilentlyContinue) {
 } else {
     Write-Host "⚠️ GitHub CLI ('gh') is not installed." -ForegroundColor Yellow
     Write-Host "Tag $tag has been pushed to GitHub." -ForegroundColor Green
-    Write-Host "Upload the installer from 'release_output' at https://github.com/amorsoftlab/OpenTransfer/releases" -ForegroundColor Cyan
+    Write-Host "Upload the installer from 'output' at https://github.com/amorsoftlab/OpenTransfer/releases" -ForegroundColor Cyan
 }
 
 Write-Host "`n==================================================" -ForegroundColor Green
