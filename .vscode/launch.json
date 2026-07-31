@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:OpenTransfer}/OpenTransferMac",
+            "name": "Debug OpenTransferMac (OpenTransferMac)",
+            "target": "OpenTransferMac",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug OpenTransferMac (OpenTransferMac)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:OpenTransfer}/OpenTransferMac",
+            "name": "Release OpenTransferMac (OpenTransferMac)",
+            "target": "OpenTransferMac",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release OpenTransferMac (OpenTransferMac)"
+        }
+    ]
+}

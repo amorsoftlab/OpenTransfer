@@ -1,0 +1,71 @@
+<Window x:Class="openTransferWPF.Dialogs.UpdateDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Software Update Available" Icon="../Assets/logo.ico" Height="340" Width="480"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource FluxSurface}" Foreground="{StaticResource FluxOnSurface}"
+        FontFamily="Inter, Segoe UI, sans-serif">
+
+    <Border Padding="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                <Image Source="../Assets/logo.png" Width="36" Height="36" Margin="0,0,12,0"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtTitle" Text="New Update Available!" Style="{StaticResource FluxTitleMd}" FontWeight="Bold"/>
+                    <TextBlock x:Name="TxtSubTitle" Text="A new version of OpenTransfer is ready to install." Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOutline}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- VERSION BADGE ROW -->
+            <Border Grid.Row="1" Background="{StaticResource FluxSurfaceContainerLow}" Padding="10" CornerRadius="6" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Current Version" FontSize="11" Foreground="{StaticResource FluxOutline}"/>
+                        <TextBlock x:Name="TxtCurrentVersion" Text="v1.2.0" FontWeight="Bold" FontSize="13"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="➔" FontSize="16" Foreground="{StaticResource FluxPrimaryContainer}" VerticalAlignment="Center" Margin="10,0"/>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Latest Version" FontSize="11" Foreground="{StaticResource FluxOutline}"/>
+                        <TextBlock x:Name="TxtLatestVersion" Text="v1.3.0" FontWeight="Bold" Foreground="#10B981" FontSize="13"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- CHANGELOG BOX -->
+            <Border Grid.Row="2" Background="{StaticResource FluxSurfaceContainerLowest}" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="TxtChangelog" Text="• Performance improvements&#10;• Fast file transfer stability fixes" Style="{StaticResource FluxBodySm}" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Border>
+
+            <!-- PROGRESS BAR CONTAINER (Hidden initially) -->
+            <StackPanel Grid.Row="3" x:Name="PnlProgress" Visibility="Collapsed" Margin="0,0,0,12">
+                <Grid Margin="0,0,0,4">
+                    <TextBlock x:Name="TxtProgressStatus" Text="Downloading update..." Style="{StaticResource FluxBodySm}" FontSize="11"/>
+                    <TextBlock x:Name="TxtProgressPercent" Text="0%" Style="{StaticResource FluxBodySm}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                </Grid>
+                <ProgressBar x:Name="PbDownload" Height="6" Minimum="0" Maximum="100" Value="0"/>
+            </StackPanel>
+
+            <!-- BUTTON BAR -->
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="BtnLater" Content="Remind Me Later" Click="BtnLater_Click" Width="130" Height="32" Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}"/>
+                <Button x:Name="BtnUpdateNow" Content="🚀 Update Now" Click="BtnUpdateNow_Click" Width="140" Height="32" Style="{StaticResource FluxPrimaryButton}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

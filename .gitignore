@@ -1,0 +1,21 @@
+bin/
+obj/
+publish/
+release_output/
+*.user
+.vs/
+
+# ── macOS Build Artifacts ────────────────────────────────────
+OpenTransferMac/.build/
+mac_build/
+mac_output/
+mac_appcast.xml
+
+# ── macOS App bundle / packages (generated) ──────────────────
+*.app/
+*.pkg
+*.xcarchive/
+
+# ── macOS system files ───────────────────────────────────────
+.DS_Store
+**/.DS_Store

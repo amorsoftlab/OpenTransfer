@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>OpenTransfer macOS Updates</title>
+        <link>https://github.com/amorsoftlab/OpenTransfer</link>
+        <description>OpenTransfer macOS Latest Releases</description>
+        <language>en</language>
+        <item>
+            <title>OpenTransfer 1.2.1</title>
+            <pubDate>Fri, 31 Jul 2026 05:10:50 +0000</pubDate>
+            <sparkle:version>1.2.1</sparkle:version>
+            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+            <sparkle:releaseNotesLink>https://github.com/amorsoftlab/OpenTransfer/releases/tag/v1.2.1</sparkle:releaseNotesLink>
+            <enclosure
+                url="https://github.com/amorsoftlab/OpenTransfer/releases/download/v1.2.1/OpenTransfer_v1.2.1_mac.pkg"
+                sparkle:version="1.2.1"
+                length="359557"
+                type="application/octet-stream"/>
+        </item>
+    </channel>
+</rss>

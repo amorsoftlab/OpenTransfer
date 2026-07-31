@@ -1,0 +1,428 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FLUENT FLUX DESIGN SYSTEM — Color Tokens
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Primary -->
+    <SolidColorBrush x:Key="FluxPrimary" Color="#00488d"/>
+    <SolidColorBrush x:Key="FluxOnPrimary" Color="#ffffff"/>
+    <SolidColorBrush x:Key="FluxPrimaryContainer" Color="#005fb8"/>
+    <SolidColorBrush x:Key="FluxOnPrimaryContainer" Color="#cadcff"/>
+    <SolidColorBrush x:Key="FluxInversePrimary" Color="#a8c8ff"/>
+    <SolidColorBrush x:Key="FluxPrimaryFixed" Color="#d6e3ff"/>
+    <SolidColorBrush x:Key="FluxPrimaryFixedDim" Color="#a8c8ff"/>
+    <SolidColorBrush x:Key="FluxOnPrimaryFixed" Color="#001b3d"/>
+    <SolidColorBrush x:Key="FluxOnPrimaryFixedVariant" Color="#00468b"/>
+
+    <!-- Secondary -->
+    <SolidColorBrush x:Key="FluxSecondary" Color="#5e5e5e"/>
+    <SolidColorBrush x:Key="FluxOnSecondary" Color="#ffffff"/>
+    <SolidColorBrush x:Key="FluxSecondaryContainer" Color="#e1dfdf"/>
+    <SolidColorBrush x:Key="FluxOnSecondaryContainer" Color="#626262"/>
+    <SolidColorBrush x:Key="FluxSecondaryFixed" Color="#e4e2e2"/>
+    <SolidColorBrush x:Key="FluxSecondaryFixedDim" Color="#c7c6c6"/>
+    <SolidColorBrush x:Key="FluxOnSecondaryFixed" Color="#1b1c1c"/>
+    <SolidColorBrush x:Key="FluxOnSecondaryFixedVariant" Color="#464747"/>
+
+    <!-- Tertiary -->
+    <SolidColorBrush x:Key="FluxTertiary" Color="#7b3200"/>
+    <SolidColorBrush x:Key="FluxOnTertiary" Color="#ffffff"/>
+    <SolidColorBrush x:Key="FluxTertiaryContainer" Color="#a04401"/>
+    <SolidColorBrush x:Key="FluxOnTertiaryContainer" Color="#ffd1bc"/>
+    <SolidColorBrush x:Key="FluxTertiaryFixed" Color="#ffdbcb"/>
+    <SolidColorBrush x:Key="FluxTertiaryFixedDim" Color="#ffb691"/>
+    <SolidColorBrush x:Key="FluxOnTertiaryFixed" Color="#341100"/>
+    <SolidColorBrush x:Key="FluxOnTertiaryFixedVariant" Color="#783100"/>
+
+    <!-- Error -->
+    <SolidColorBrush x:Key="FluxError" Color="#ba1a1a"/>
+    <SolidColorBrush x:Key="FluxOnError" Color="#ffffff"/>
+    <SolidColorBrush x:Key="FluxErrorContainer" Color="#ffdad6"/>
+    <SolidColorBrush x:Key="FluxOnErrorContainer" Color="#93000a"/>
+
+    <!-- Surface Hierarchy -->
+    <SolidColorBrush x:Key="FluxSurface" Color="#fcf9f8"/>
+    <SolidColorBrush x:Key="FluxSurfaceDim" Color="#dcd9d9"/>
+    <SolidColorBrush x:Key="FluxSurfaceBright" Color="#fcf9f8"/>
+    <SolidColorBrush x:Key="FluxSurfaceContainerLowest" Color="#ffffff"/>
+    <SolidColorBrush x:Key="FluxSurfaceContainerLow" Color="#f6f3f2"/>
+    <SolidColorBrush x:Key="FluxSurfaceContainer" Color="#f0eded"/>
+    <SolidColorBrush x:Key="FluxSurfaceContainerHigh" Color="#eae7e7"/>
+    <SolidColorBrush x:Key="FluxSurfaceContainerHighest" Color="#e5e2e1"/>
+    <SolidColorBrush x:Key="FluxSurfaceVariant" Color="#e5e2e1"/>
+    <SolidColorBrush x:Key="FluxOnSurface" Color="#1b1b1b"/>
+    <SolidColorBrush x:Key="FluxOnSurfaceVariant" Color="#424752"/>
+    <SolidColorBrush x:Key="FluxInverseSurface" Color="#313030"/>
+    <SolidColorBrush x:Key="FluxInverseOnSurface" Color="#f3f0ef"/>
+
+    <!-- Outline -->
+    <SolidColorBrush x:Key="FluxOutline" Color="#727783"/>
+    <SolidColorBrush x:Key="FluxOutlineVariant" Color="#c2c6d4"/>
+
+    <!-- Surface Tint -->
+    <SolidColorBrush x:Key="FluxSurfaceTint" Color="#005db5"/>
+
+    <!-- Interactive State Tints -->
+    <SolidColorBrush x:Key="FluxSelectedRowTint" Color="#0f005fb8"/>
+    <SolidColorBrush x:Key="FluxHoverTint" Color="#08000000"/>
+
+    <!-- Background aliases -->
+    <SolidColorBrush x:Key="FluxBackground" Color="#fcf9f8"/>
+    <SolidColorBrush x:Key="FluxOnBackground" Color="#1b1b1b"/>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SPACING & SHAPE CONSTANTS
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Spacing -->
+    <sys:Double x:Key="FluxUnit" xmlns:sys="clr-namespace:System;assembly=mscorlib">4</sys:Double>
+    <sys:Double x:Key="FluxGutter" xmlns:sys="clr-namespace:System;assembly=mscorlib">12</sys:Double>
+    <sys:Double x:Key="FluxMarginDesktop" xmlns:sys="clr-namespace:System;assembly=mscorlib">24</sys:Double>
+    <sys:Double x:Key="FluxRowHeight" xmlns:sys="clr-namespace:System;assembly=mscorlib">40</sys:Double>
+    <sys:Double x:Key="FluxSidebarWidth" xmlns:sys="clr-namespace:System;assembly=mscorlib">240</sys:Double>
+
+    <!-- Shape Radii -->
+    <CornerRadius x:Key="FluxRadiusSm">2</CornerRadius>
+    <CornerRadius x:Key="FluxRadius">4</CornerRadius>
+    <CornerRadius x:Key="FluxRadiusMd">6</CornerRadius>
+    <CornerRadius x:Key="FluxRadiusLg">8</CornerRadius>
+    <CornerRadius x:Key="FluxRadiusXl">12</CornerRadius>
+    <CornerRadius x:Key="FluxRadiusFull">9999</CornerRadius>
+
+    <!-- Elevation -->
+    <DropShadowEffect x:Key="FluxShadowLevel2" ShadowDepth="4" Direction="270"
+                      BlurRadius="16" Opacity="0.08" Color="Black"/>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TYPOGRAPHY STYLES
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <Style x:Key="FluxHeadlineLg" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+    </Style>
+
+    <Style x:Key="FluxHeadlineMd" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+    </Style>
+
+    <Style x:Key="FluxTitleMd" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+    </Style>
+
+    <Style x:Key="FluxBodyMd" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+    </Style>
+
+    <Style x:Key="FluxBodySm" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurfaceVariant}"/>
+    </Style>
+
+    <Style x:Key="FluxLabelMd" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurfaceVariant}"/>
+    </Style>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         COMPONENT STYLES
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Navigation Circular Button (Back, Forward, Up) -->
+    <Style x:Key="FluxNavButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurfaceVariant}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="NavBorder" Background="{TemplateBinding Background}" CornerRadius="16">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="NavBorder" Property="Background" Value="{StaticResource FluxHoverTint}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="NavBorder" Property="Background" Value="{StaticResource FluxSurfaceContainerHigh}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.38"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Action Toolbar Button (New Folder, Rename, Refresh) -->
+    <Style x:Key="FluxActionButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurfaceVariant}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ActionBorder" Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource FluxRadius}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ActionBorder" Property="Background" Value="{StaticResource FluxHoverTint}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="ActionBorder" Property="Background" Value="{StaticResource FluxSurfaceContainerHigh}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Primary Filled Button (Start Transfer, etc.) -->
+    <Style x:Key="FluxPrimaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource FluxPrimaryContainer}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnPrimary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="PrimaryBorder" Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource FluxRadius}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="PrimaryBorder" Property="Background" Value="{StaticResource FluxPrimary}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="PrimaryBorder" Property="Background" Value="{StaticResource FluxOnPrimaryFixedVariant}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Ghost / Secondary Button (Cancel, etc.) -->
+    <Style x:Key="FluxGhostButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluxOutlineVariant}"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="GhostBorder" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{StaticResource FluxRadius}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="GhostBorder" Property="Background" Value="{StaticResource FluxHoverTint}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="GhostBorder" Property="Background" Value="{StaticResource FluxSurfaceContainerHigh}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Danger / Error Button (Cancel Transfer, Delete) -->
+    <Style x:Key="FluxDangerButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource FluxError}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnError}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="DangerBorder" Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource FluxRadius}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="DangerBorder" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="#a01515"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="DangerBorder" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="#8b1010"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ListView Item Style — 40px row, accent bar on selection -->
+    <Style x:Key="FluxListViewItem" TargetType="ListViewItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluxSurfaceContainer}"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Border x:Name="RowBorder" Background="Transparent"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="0" SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- Selection Accent Bar -->
+                            <Border x:Name="AccentBar" Grid.Column="0" Background="Transparent"
+                                    CornerRadius="1.5" Margin="0,6" Width="3"/>
+                            <!-- Content for GridView -->
+                            <GridViewRowPresenter x:Name="GridViewPresenter" Grid.Column="1" Margin="6,7"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}"
+                                                  Columns="{TemplateBinding GridView.ColumnCollection}"/>
+                            <!-- Content for Non-GridView (Tile View) -->
+                            <ContentPresenter x:Name="ContentPresenter" Grid.Column="1" Margin="2"
+                                              VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="Collapsed"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="GridView.ColumnCollection" Value="{x:Null}">
+                            <Setter TargetName="GridViewPresenter" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="ContentPresenter" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource FluxHoverTint}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource FluxSelectedRowTint}"/>
+                            <Setter TargetName="AccentBar" Property="Background" Value="{StaticResource FluxPrimaryContainer}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsSelected" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource FluxSelectedRowTint}"/>
+                            <Setter TargetName="AccentBar" Property="Background" Value="{StaticResource FluxPrimaryContainer}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Progress Bar — 4px Fluent track -->
+    <Style x:Key="FluxProgressBar" TargetType="ProgressBar">
+        <Setter Property="Height" Value="4"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxPrimaryContainer}"/>
+        <Setter Property="Background" Value="{StaticResource FluxSurfaceContainerHigh}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid SnapsToDevicePixels="True">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="2"/>
+                        <Border x:Name="PART_Track" CornerRadius="2"/>
+                        <Border x:Name="PART_Indicator" HorizontalAlignment="Left"
+                                Background="{TemplateBinding Foreground}" CornerRadius="2"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Column Header Style -->
+    <Style x:Key="FluxColumnHeader" TargetType="GridViewColumnHeader">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurfaceVariant}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="6,8"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GridViewColumnHeader">
+                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                            BorderBrush="{StaticResource FluxSurfaceContainer}" BorderThickness="0,0,0,1">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Context Menu Style -->
+    <Style x:Key="FluxContextMenu" TargetType="ContextMenu">
+        <Setter Property="Background" Value="{StaticResource FluxSurfaceContainerLowest}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FluxOutlineVariant}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="2,4"/>
+    </Style>
+
+</ResourceDictionary>
