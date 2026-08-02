@@ -12,7 +12,7 @@ namespace openTransferWPF.Services
     {
         public bool IsUpdateAvailable { get; set; }
         public string LatestVersion { get; set; } = string.Empty;
-        public string CurrentVersion { get; set; } = "1.2.0";
+        public string CurrentVersion { get; set; } = "1.2.3";
         public string ReleaseNotes { get; set; } = string.Empty;
         public string DownloadUrl { get; set; } = string.Empty;
         public string HtmlUrl { get; set; } = string.Empty;
@@ -23,7 +23,7 @@ namespace openTransferWPF.Services
         private static readonly Lazy<UpdateService> _instance = new(() => new UpdateService());
         public static UpdateService Instance => _instance.Value;
 
-        public const string CurrentAppVersion = "1.2.1";
+        public const string CurrentAppVersion = "1.2.3";
         private const string GitHubApiUrl = "https://api.github.com/repos/amorsoftlab/OpenTransfer/releases/latest";
 
         private readonly HttpClient _httpClient;

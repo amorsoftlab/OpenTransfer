@@ -35,7 +35,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Current Version" FontSize="11" Foreground="{StaticResource FluxOutline}"/>
-                        <TextBlock x:Name="TxtCurrentVersion" Text="v1.2.0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock x:Name="TxtCurrentVersion" Text="v1.2.3" FontWeight="Bold" FontSize="13"/>
                     </StackPanel>
                     <TextBlock Grid.Column="1" Text="➔" FontSize="16" Foreground="{StaticResource FluxPrimaryContainer}" VerticalAlignment="Center" Margin="10,0"/>
                     <StackPanel Grid.Column="2">

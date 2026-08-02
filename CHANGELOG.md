@@ -4,6 +4,14 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.3] - 2026-08-02
+
+### 🎨 Added
+- **Version 1.2.3 Release Update:**
+  - Synchronized application versioning across core WPF components, update services, release automation scripts, and installer configs.
+
+---
+
 ## [1.2.1] - 2026-07-31
 
 ###  Added
