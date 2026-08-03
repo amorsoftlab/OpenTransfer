@@ -294,6 +294,26 @@ namespace openTransferWPF.Services
             return res.ExitCode == 0;
         }
 
+        public async Task<bool> CleanEmptyFoldersAsync(string serial, string remotePath)
+        {
+            string cmd = $@"
+find '{remotePath}' -type f -name '*.dat' -delete
+find '{remotePath}' -type f -name '*.DAT' -delete
+find '{remotePath}' -type f -name '.DS_Store' -delete
+find '{remotePath}' -type f -name '._*' -delete
+find '{remotePath}' -type f -name 'Thumbs.db' -delete
+find '{remotePath}' -type f -name 'desktop.ini' -delete
+find '{remotePath}' -type f -name '.trashed-*' -delete
+sleep 1
+find '{remotePath}' -type d -empty -delete
+sleep 1
+find '{remotePath}' -type d -empty -delete
+sleep 1
+find '{remotePath}' -type d -empty -delete".Replace("\r", "");
+            var res = await RunBase64ShellCmdAsync(serial, cmd);
+            return res.ExitCode == 0;
+        }
+
         public async Task<bool> RenameItemAsync(string serial, string oldPath, string newPath)
         {
             string cmd = $"mv '{oldPath}' '{newPath}'";

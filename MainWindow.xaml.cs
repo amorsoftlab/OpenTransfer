@@ -297,6 +297,47 @@ namespace openTransferWPF
             }
         }
 
+        private async void BtnDeleteEmptyFolders_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_activeSerial)) return;
+            
+            string targetPath = _currentPath;
+            
+            // Only use SelectedItem if invoked from the ContextMenu (MenuItem)
+            if (sender is System.Windows.Controls.MenuItem && LstFiles.SelectedItem is AndroidFileItem item && item.IsDir)
+            {
+                targetPath = item.Path;
+            }
+            
+            var confirm = MessageBox.Show($"Are you sure you want to clean all empty folders recursively inside:\n\n{targetPath}\n\n(This will scan everything inside this folder and its subfolders)", "Clean Empty Folders", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (confirm == MessageBoxResult.Yes)
+            {
+                TxtStatusFooter.Text = "Cleaning empty folders...";
+                bool ok = await _adbService.CleanEmptyFoldersAsync(_activeSerial, targetPath);
+                if (ok)
+                {
+                    Log($"Cleaned empty folders in '{targetPath}'");
+                    TxtStatusFooter.Text = "Cleanup complete.";
+                    
+                    var successDialog = new openTransferWPF.Dialogs.SuccessDialog(
+                        "Cleanup Complete", 
+                        "All empty folders and .DAT files have been removed successfully."
+                    )
+                    {
+                        Owner = this
+                    };
+                    successDialog.ShowDialog();
+                }
+                else
+                {
+                    Log($"Failed to clean empty folders in '{targetPath}'");
+                    TxtStatusFooter.Text = "Cleanup failed.";
+                    MessageBox.Show("Failed to clean empty folders.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                _ = LoadDirectoryAsync(_currentPath);
+            }
+        }
+
         private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_activeSerial)) return;

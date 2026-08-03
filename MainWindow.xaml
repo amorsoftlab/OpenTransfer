@@ -223,6 +223,13 @@
                         <TextBlock Text="Storage Analyzer" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
+
+                <Button Style="{StaticResource FluxActionButton}" Click="BtnDeleteEmptyFolders_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🧹" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
+                        <TextBlock Text="Clean Empty Folders" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Border>
 
@@ -250,6 +257,8 @@
                             <MenuItem Header="📁 New Folder..." Click="BtnNewFolder_Click"/>
                             <MenuItem Header="✏️ Rename..." Click="BtnRename_Click"/>
                             <MenuItem Header="🗑️ Delete" Click="BtnDelete_Click"/>
+                            <Separator/>
+                            <MenuItem Header="🧹 Clean Empty Folders..." Click="BtnDeleteEmptyFolders_Click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.ItemContainerStyle>

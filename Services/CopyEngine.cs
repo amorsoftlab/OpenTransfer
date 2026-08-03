@@ -119,6 +119,8 @@ namespace openTransferWPF.Services
             long lastReportTicks = 0;
             long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle for overall stats
 
+            var dirFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
             for (int i = 0; i < remoteFiles.Count; i++)
             {
                 ct.ThrowIfCancellationRequested();
@@ -138,16 +140,54 @@ namespace openTransferWPF.Services
                 }
 
                 // Check Auto-Split Settings
-                string effectiveLocalDest = localDestDir;
+                string localTargetPath;
                 var settings = SettingsService.Instance.Settings;
                 if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
                 {
-                    int batchIndex = (i / settings.AutoSplitBatchSize) + 1;
-                    string subFolder = settings.AutoSplitNamingFormat == "Day" ? $"day 1-{batchIndex}" : $"photo-{batchIndex}";
-                    effectiveLocalDest = Path.Combine(localDestDir, subFolder);
+                    string relDir = Path.GetDirectoryName(relPath.Replace('/', Path.DirectorySeparatorChar)) ?? "";
+                    string fileName = Path.GetFileName(relPath.Replace('/', Path.DirectorySeparatorChar));
+                    
+                    if (!dirFileCounts.TryGetValue(relDir, out int count)) count = 0;
+                    dirFileCounts[relDir] = count + 1;
+                    
+                    int batchIndex = (count / settings.AutoSplitBatchSize) + 1;
+                    string subFolder;
+                    
+                    if (settings.AutoSplitNamingFormat == "Day")
+                    {
+                        subFolder = $"day 1-{batchIndex}";
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(relDir))
+                        {
+                            string leafFolder = Path.GetFileName(relDir);
+                            string parentFolder = Path.GetFileName(Path.GetDirectoryName(relDir) ?? "");
+                            if (string.IsNullOrEmpty(parentFolder)) 
+                            {
+                                string rootName = Path.GetFileName(cleanRemoteBase);
+                                if (string.IsNullOrEmpty(rootName)) rootName = "folder";
+                                subFolder = $"{rootName} {leafFolder}_{batchIndex}";
+                            }
+                            else
+                            {
+                                subFolder = $"{parentFolder} {leafFolder}_{batchIndex}";
+                            }
+                        }
+                        else
+                        {
+                            string rootName = Path.GetFileName(cleanRemoteBase);
+                            if (string.IsNullOrEmpty(rootName)) rootName = "photo";
+                            subFolder = $"{rootName}_{batchIndex}";
+                        }
+                    }
+                    
+                    localTargetPath = Path.Combine(localDestDir, relDir, subFolder, fileName);
                 }
-
-                string localTargetPath = Path.Combine(effectiveLocalDest, relPath.Replace('/', Path.DirectorySeparatorChar));
+                else
+                {
+                    localTargetPath = Path.Combine(localDestDir, relPath.Replace('/', Path.DirectorySeparatorChar));
+                }
 
                 // O(1) Dictionary Skip Check
                 if (strategyMode == "SkipExisting")
@@ -279,6 +319,8 @@ namespace openTransferWPF.Services
             long lastReportTicks = 0;
             long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle for overall stats
 
+            var dirFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
             for (int i = 0; i < itemsToPush.Count; i++)
             {
                 ct.ThrowIfCancellationRequested();
@@ -292,16 +334,57 @@ namespace openTransferWPF.Services
                 var item = itemsToPush[i];
 
                 // Check Auto-Split Settings
-                string effectiveRemoteBase = cleanRemoteBase;
+                string remoteTargetFile;
                 var settings = SettingsService.Instance.Settings;
                 if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
                 {
-                    int batchIndex = (i / settings.AutoSplitBatchSize) + 1;
-                    string subFolder = settings.AutoSplitNamingFormat == "Day" ? $"day 1-{batchIndex}" : $"photo-{batchIndex}";
-                    effectiveRemoteBase = $"{cleanRemoteBase}/{subFolder}";
+                    string relDir = Path.GetDirectoryName(item.RelativeRemotePath.Replace('\\', '/'))?.Replace('\\', '/') ?? "";
+                    string splitFileName = Path.GetFileName(item.RelativeRemotePath.Replace('\\', '/'));
+                    
+                    if (!dirFileCounts.TryGetValue(relDir, out int count)) count = 0;
+                    dirFileCounts[relDir] = count + 1;
+                    
+                    int batchIndex = (count / settings.AutoSplitBatchSize) + 1;
+                    string subFolder;
+                    
+                    if (settings.AutoSplitNamingFormat == "Day")
+                    {
+                        subFolder = $"day 1-{batchIndex}";
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(relDir))
+                        {
+                            string leafFolder = Path.GetFileName(relDir);
+                            string parentFolder = Path.GetFileName(Path.GetDirectoryName(relDir) ?? "");
+                            if (string.IsNullOrEmpty(parentFolder)) 
+                            {
+                                string rootName = Path.GetFileName(cleanRemoteBase);
+                                if (string.IsNullOrEmpty(rootName)) rootName = "folder";
+                                subFolder = $"{rootName} {leafFolder}_{batchIndex}";
+                            }
+                            else
+                            {
+                                subFolder = $"{parentFolder} {leafFolder}_{batchIndex}";
+                            }
+                        }
+                        else
+                        {
+                            string rootName = Path.GetFileName(cleanRemoteBase);
+                            if (string.IsNullOrEmpty(rootName)) rootName = "photo";
+                            subFolder = $"{rootName}_{batchIndex}";
+                        }
+                    }
+                    
+                    string combinedRelPath = string.IsNullOrEmpty(relDir) 
+                        ? $"{subFolder}/{splitFileName}" 
+                        : $"{relDir}/{subFolder}/{splitFileName}";
+                    remoteTargetFile = $"{cleanRemoteBase}/{combinedRelPath}";
                 }
-
-                string remoteTargetFile = $"{effectiveRemoteBase}/{item.RelativeRemotePath}";
+                else
+                {
+                    remoteTargetFile = $"{cleanRemoteBase}/{item.RelativeRemotePath}";
+                }
 
                 long fileSize = 0;
                 try { fileSize = new FileInfo(item.LocalPath).Length; } catch { }

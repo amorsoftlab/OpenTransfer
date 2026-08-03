@@ -4,6 +4,16 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.4] - 2026-08-03
+
+### 🛠️ Fixed & Improved
+- **Auto-Split Logic Enhancement:** Split subfolders are now created within their respective leaf directories instead of at the root level, preserving the original folder structure during auto-split transfers. Naming has been updated to include the parent folder name for better context.
+- **Clean Empty Folders:** Added a new context menu option in the File Explorer to recursively clean and delete empty folders from the Android device, similar to macOS folder cleanup behaviors.
+- **Empty Folder Deep Clean & FUSE Fix:** Upgraded folder cleanup to automatically destroy invisible macOS/Windows/Android junk files (`.DS_Store`, `Thumbs.db`, `*.DAT`, and `.trashed-*` recycle bin files). Added a loop delay to bypass Android FUSE cache lagging during recursive deletes.
+- **Custom Success Dialog:** Implemented a new custom Fluent-styled `SuccessDialog` to replace the generic Windows MessageBox upon completion.
+
+---
+
 ## [1.2.3] - 2026-08-02
 
 ### 🎨 Added
