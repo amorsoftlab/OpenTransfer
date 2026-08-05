@@ -119,6 +119,23 @@ namespace openTransferWPF.Services
             long lastReportTicks = 0;
             long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle for overall stats
 
+            // Pre-calculate directory file counts for Auto-Split
+            var folderTotalCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (SettingsService.Instance.Settings.AutoSplitOnTransfer && SettingsService.Instance.Settings.AutoSplitBatchSize > 0)
+            {
+                foreach (var rf in remoteFiles)
+                {
+                    string rPath = rf.Path;
+                    if (rPath.StartsWith(cleanRemoteBase, StringComparison.OrdinalIgnoreCase))
+                    {
+                        rPath = rPath.Substring(cleanRemoteBase.Length).TrimStart('/', '\\');
+                    }
+                    string rDir = Path.GetDirectoryName(rPath.Replace('/', Path.DirectorySeparatorChar)) ?? "";
+                    if (!folderTotalCounts.TryGetValue(rDir, out int c)) c = 0;
+                    folderTotalCounts[rDir] = c + 1;
+                }
+            }
+
             var dirFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < remoteFiles.Count; i++)
@@ -142,15 +159,22 @@ namespace openTransferWPF.Services
                 // Check Auto-Split Settings
                 string localTargetPath;
                 var settings = SettingsService.Instance.Settings;
-                if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
+                
+                string relDirForSplit = Path.GetDirectoryName(relPath.Replace('/', Path.DirectorySeparatorChar)) ?? "";
+                bool shouldSplit = settings.AutoSplitOnTransfer && 
+                                   settings.AutoSplitBatchSize > 0 && 
+                                   folderTotalCounts.TryGetValue(relDirForSplit, out int totCount) && 
+                                   totCount > settings.AutoSplitBatchSize;
+
+                if (shouldSplit)
                 {
-                    string relDir = Path.GetDirectoryName(relPath.Replace('/', Path.DirectorySeparatorChar)) ?? "";
+                    string relDir = relDirForSplit;
                     string fileName = Path.GetFileName(relPath.Replace('/', Path.DirectorySeparatorChar));
                     
                     if (!dirFileCounts.TryGetValue(relDir, out int count)) count = 0;
                     dirFileCounts[relDir] = count + 1;
                     
-                    int batchIndex = (count / settings.AutoSplitBatchSize) + 1;
+                    int batchIndex = ((count - 1) / settings.AutoSplitBatchSize) + 1;
                     string subFolder;
                     
                     if (settings.AutoSplitNamingFormat == "Day")
@@ -165,9 +189,7 @@ namespace openTransferWPF.Services
                             string parentFolder = Path.GetFileName(Path.GetDirectoryName(relDir) ?? "");
                             if (string.IsNullOrEmpty(parentFolder)) 
                             {
-                                string rootName = Path.GetFileName(cleanRemoteBase);
-                                if (string.IsNullOrEmpty(rootName)) rootName = "folder";
-                                subFolder = $"{rootName} {leafFolder}_{batchIndex}";
+                                subFolder = $"{leafFolder}_{batchIndex}";
                             }
                             else
                             {
@@ -177,7 +199,7 @@ namespace openTransferWPF.Services
                         else
                         {
                             string rootName = Path.GetFileName(cleanRemoteBase);
-                            if (string.IsNullOrEmpty(rootName)) rootName = "photo";
+                            if (string.IsNullOrEmpty(rootName) || rootName.Equals("sdcard", StringComparison.OrdinalIgnoreCase)) rootName = "photo";
                             subFolder = $"{rootName}_{batchIndex}";
                         }
                     }
@@ -319,6 +341,18 @@ namespace openTransferWPF.Services
             long lastReportTicks = 0;
             long reportIntervalTicks = (long)(0.15 * Stopwatch.Frequency); // 150ms throttle for overall stats
 
+            // Pre-calculate directory file counts for Auto-Split
+            var folderTotalCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (SettingsService.Instance.Settings.AutoSplitOnTransfer && SettingsService.Instance.Settings.AutoSplitBatchSize > 0)
+            {
+                foreach (var item in itemsToPush)
+                {
+                    string rDir = Path.GetDirectoryName(item.RelativeRemotePath.Replace('\\', '/'))?.Replace('\\', '/') ?? "";
+                    if (!folderTotalCounts.TryGetValue(rDir, out int c)) c = 0;
+                    folderTotalCounts[rDir] = c + 1;
+                }
+            }
+
             var dirFileCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < itemsToPush.Count; i++)
@@ -336,15 +370,22 @@ namespace openTransferWPF.Services
                 // Check Auto-Split Settings
                 string remoteTargetFile;
                 var settings = SettingsService.Instance.Settings;
-                if (settings.AutoSplitOnTransfer && settings.AutoSplitBatchSize > 0)
+                
+                string relDirForSplit = Path.GetDirectoryName(item.RelativeRemotePath.Replace('\\', '/'))?.Replace('\\', '/') ?? "";
+                bool shouldSplit = settings.AutoSplitOnTransfer && 
+                                   settings.AutoSplitBatchSize > 0 && 
+                                   folderTotalCounts.TryGetValue(relDirForSplit, out int totCount) && 
+                                   totCount > settings.AutoSplitBatchSize;
+
+                if (shouldSplit)
                 {
-                    string relDir = Path.GetDirectoryName(item.RelativeRemotePath.Replace('\\', '/'))?.Replace('\\', '/') ?? "";
+                    string relDir = relDirForSplit;
                     string splitFileName = Path.GetFileName(item.RelativeRemotePath.Replace('\\', '/'));
                     
                     if (!dirFileCounts.TryGetValue(relDir, out int count)) count = 0;
                     dirFileCounts[relDir] = count + 1;
                     
-                    int batchIndex = (count / settings.AutoSplitBatchSize) + 1;
+                    int batchIndex = ((count - 1) / settings.AutoSplitBatchSize) + 1;
                     string subFolder;
                     
                     if (settings.AutoSplitNamingFormat == "Day")
@@ -359,9 +400,7 @@ namespace openTransferWPF.Services
                             string parentFolder = Path.GetFileName(Path.GetDirectoryName(relDir) ?? "");
                             if (string.IsNullOrEmpty(parentFolder)) 
                             {
-                                string rootName = Path.GetFileName(cleanRemoteBase);
-                                if (string.IsNullOrEmpty(rootName)) rootName = "folder";
-                                subFolder = $"{rootName} {leafFolder}_{batchIndex}";
+                                subFolder = $"{leafFolder}_{batchIndex}";
                             }
                             else
                             {
@@ -371,7 +410,7 @@ namespace openTransferWPF.Services
                         else
                         {
                             string rootName = Path.GetFileName(cleanRemoteBase);
-                            if (string.IsNullOrEmpty(rootName)) rootName = "photo";
+                            if (string.IsNullOrEmpty(rootName) || rootName.Equals("sdcard", StringComparison.OrdinalIgnoreCase)) rootName = "photo";
                             subFolder = $"{rootName}_{batchIndex}";
                         }
                     }
