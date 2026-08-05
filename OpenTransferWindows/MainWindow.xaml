@@ -150,7 +150,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="📱" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Column="0" Text="📱" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="BtnRootFolder_Click" ToolTip="Go to root folder"/>
                         <ComboBox Grid.Column="1" x:Name="CmbDevices" SelectionChanged="CmbDevices_SelectionChanged"
                                   BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                   FontFamily="Inter, Segoe UI, sans-serif" FontSize="13" FontWeight="Bold"

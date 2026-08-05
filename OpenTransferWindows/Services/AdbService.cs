@@ -294,24 +294,28 @@ namespace openTransferWPF.Services
             return res.ExitCode == 0;
         }
 
-        public async Task<bool> CleanEmptyFoldersAsync(string serial, string remotePath)
+        public async Task<int> CleanEmptyFoldersAsync(string serial, string remotePath)
         {
-            string cmd = $@"
-find '{remotePath}' -type f -name '*.dat' -delete
-find '{remotePath}' -type f -name '*.DAT' -delete
-find '{remotePath}' -type f -name '.DS_Store' -delete
-find '{remotePath}' -type f -name '._*' -delete
-find '{remotePath}' -type f -name 'Thumbs.db' -delete
-find '{remotePath}' -type f -name 'desktop.ini' -delete
-find '{remotePath}' -type f -name '.trashed-*' -delete
-sleep 1
-find '{remotePath}' -type d -empty -delete
-sleep 1
-find '{remotePath}' -type d -empty -delete
-sleep 1
-find '{remotePath}' -type d -empty -delete".Replace("\r", "");
-            var res = await RunBase64ShellCmdAsync(serial, cmd);
-            return res.ExitCode == 0;
+            remotePath = remotePath.TrimEnd('/');
+            if (string.IsNullOrEmpty(remotePath)) remotePath = "/sdcard";
+
+            string script = $@"
+find '{remotePath}/' -mindepth 1 -depth -type d > /data/local/tmp/dirs.txt
+deleted=0
+while read -r dir; do
+    if rmdir ""$dir"" 2>/dev/null; then
+        deleted=$((deleted+1))
+    fi
+done < /data/local/tmp/dirs.txt
+rm -f /data/local/tmp/dirs.txt
+echo $deleted".Replace("\r", "");
+            
+            var res = await RunBase64ShellCmdAsync(serial, script, timeoutMs: 120000);
+            if (res.ExitCode == 0 && int.TryParse(res.Stdout?.Trim(), out int deletedCount))
+            {
+                return deletedCount;
+            }
+            return 0;
         }
 
         public async Task<bool> RenameItemAsync(string serial, string oldPath, string newPath)

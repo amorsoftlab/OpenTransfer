@@ -249,6 +249,11 @@ namespace openTransferWPF
             _ = LoadDirectoryAsync(parent);
         }
 
+        private void BtnRootFolder_Click(object sender, MouseButtonEventArgs e)
+        {
+            _ = LoadDirectoryAsync("/sdcard");
+        }
+
         private void TxtPath_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -313,15 +318,16 @@ namespace openTransferWPF
             if (confirm == MessageBoxResult.Yes)
             {
                 TxtStatusFooter.Text = "Cleaning empty folders...";
-                bool ok = await _adbService.CleanEmptyFoldersAsync(_activeSerial, targetPath);
-                if (ok)
+                int deletedCount = await _adbService.CleanEmptyFoldersAsync(_activeSerial, targetPath);
+                if (deletedCount >= 0)
                 {
-                    Log($"Cleaned empty folders in '{targetPath}'");
+                    Log($"Cleaned {deletedCount} empty folders in '{targetPath}'");
                     TxtStatusFooter.Text = "Cleanup complete.";
                     
+                    await LoadDirectoryAsync(_currentPath); // Refresh UI BEFORE showing dialog
                     var successDialog = new openTransferWPF.Dialogs.SuccessDialog(
                         "Cleanup Complete", 
-                        "All empty folders and .DAT files have been removed successfully."
+                        $"Successfully removed {deletedCount} empty folder(s)."
                     )
                     {
                         Owner = this
@@ -334,7 +340,6 @@ namespace openTransferWPF
                     TxtStatusFooter.Text = "Cleanup failed.";
                     MessageBox.Show("Failed to clean empty folders.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                _ = LoadDirectoryAsync(_currentPath);
             }
         }
 
