@@ -8,8 +8,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
-    <Version>1.2.10</Version>
-    <AssemblyVersion>1.2.10.0</AssemblyVersion>
+    <Version>1.2.11</Version>
+    <AssemblyVersion>1.2.11.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

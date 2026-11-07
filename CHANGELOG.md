@@ -4,6 +4,14 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.11] - 2026-11-07
+
+### 🛠️ Fixed
+- Enforced a single OpenTransfer process; launching again now restores and focuses the existing window instead of creating another tray icon.
+- Added an installer mutex check to prevent parallel app/update instances.
+
+---
+
 ## [1.2.10] - 2026-11-07
 
 ### 🛠️ Hotfix

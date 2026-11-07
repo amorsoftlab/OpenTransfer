@@ -7,6 +7,7 @@ OpenTransferWindows/verify_publish/
 OpenTransferWindows/theme_verify/
 OpenTransferWindows/hover_verify/
 OpenTransferWindows/hover_verify2/
+OpenTransferWindows/single_verify/
 publish/
 release_output/
 *.user
