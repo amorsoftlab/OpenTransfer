@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings" Icon="../Assets/logo.ico" Height="540" Width="760"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource FluxSurface}" Foreground="{StaticResource FluxOnSurface}"
+        Background="{DynamicResource FluxSurface}" Foreground="{DynamicResource FluxOnSurface}"
         FontFamily="Inter, Segoe UI, sans-serif">
 
     <Window.Resources>
         <Style x:Key="SettingsTabButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FluxOnSurface}"/>
             <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -50,7 +50,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- LEFT SIDEBAR CATEGORY MENU -->
-        <Border Grid.Column="0" Grid.Row="0" Background="{StaticResource FluxSurfaceContainerLow}"
+        <Border Grid.Column="0" Grid.Row="0" Background="{DynamicResource FluxSurfaceContainerLow}"
                 CornerRadius="8" Margin="0,0,12,0" Padding="6">
             <StackPanel x:Name="PnlCategoryMenu">
                 <Button x:Name="TabGeneral" Content="⚙️  General" Click="TabButton_Click" Tag="0"
@@ -71,13 +71,13 @@
         </Border>
 
         <!-- RIGHT CONTENT PANELS -->
-        <Border Grid.Column="1" Grid.Row="0" Background="{StaticResource FluxSurfaceContainerLowest}"
-                CornerRadius="8" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1" Padding="20">
+        <Border Grid.Column="1" Grid.Row="0" Background="{DynamicResource FluxSurfaceContainerLowest}"
+                CornerRadius="8" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1" Padding="20">
             <Grid>
                 <!-- 0. GENERAL PANEL -->
                 <ScrollViewer x:Name="PnlGeneral" Visibility="Visible" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Startup &amp; Background Behavior" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Startup &amp; Background Behavior" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                         <CheckBox x:Name="ChkLaunchStartup" Content="Launch at Windows startup" Margin="0,0,0,10"/>
                         <CheckBox x:Name="ChkMinimizeTray" Content="Minimize to system tray on close" Margin="0,0,0,10"/>
                         <CheckBox x:Name="ChkAutoDetect" Content="Auto detect Android USB devices" IsChecked="True" Margin="0,0,0,10"/>
@@ -88,7 +88,7 @@
                 <!-- 1. APPEARANCE PANEL -->
                 <ScrollViewer x:Name="PnlAppearance" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Theme Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Theme Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                         <TextBlock Text="Application Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox x:Name="CmbTheme" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
                             <ComboBoxItem Content="System Default"/>
@@ -107,7 +107,7 @@
                 <!-- 2. TRANSFERS PANEL -->
                 <ScrollViewer x:Name="PnlTransfers" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="File Transfer &amp; Conflict Policies" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="File Transfer &amp; Conflict Policies" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                         
                         <TextBlock Text="Conflict Resolution (When File Exists):" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox x:Name="CmbConflict" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
@@ -157,7 +157,7 @@
                 <!-- 3. DEVICE PANEL -->
                 <ScrollViewer x:Name="PnlDevice" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Device &amp; Storage Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Device &amp; Storage Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                         <TextBlock Text="Default Storage Location:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox x:Name="CmbDefaultStorage" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
@@ -177,7 +177,7 @@
                 <!-- 4. EXPLORER PANEL -->
                 <ScrollViewer x:Name="PnlExplorer" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="File Explorer Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="File Explorer Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                         <TextBlock Text="Default Startup View:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox x:Name="CmbDefaultView" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
@@ -199,7 +199,7 @@
                 <!-- 5. ADVANCED PANEL -->
                 <ScrollViewer x:Name="PnlAdvanced" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="Advanced ADB Configuration" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Advanced ADB Configuration" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                         <TextBlock Text="ADB Executable Path:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <Grid Margin="0,0,0,14">
@@ -208,7 +208,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="TxtCustomAdbPath" Padding="8,6" FontSize="12"/>
-                            <Button Grid.Column="1" Content="Browse..." Click="BtnBrowseAdb_Click" Margin="8,0,0,0" Padding="12,4" Style="{StaticResource FluxGhostButton}"/>
+                            <Button Grid.Column="1" Content="Browse..." Click="BtnBrowseAdb_Click" Margin="8,0,0,0" Padding="12,4" Style="{DynamicResource FluxGhostButton}"/>
                         </Grid>
 
                         <TextBlock Text="ADB Operation Timeout:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
@@ -228,20 +228,20 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                             <Image Source="../Assets/logo.png" Width="48" Height="48" Margin="0,0,12,0"/>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="openTransferWPF" Style="{StaticResource FluxTitleMd}" FontWeight="Bold"/>
-                                <TextBlock Text="Native High-Speed Android USB File Transfer" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOutline}"/>
+                                <TextBlock Text="openTransferWPF" Style="{DynamicResource FluxTitleMd}" FontWeight="Bold"/>
+                                <TextBlock Text="Native High-Speed Android USB File Transfer" Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOutline}"/>
                             </StackPanel>
                         </StackPanel>
 
-                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
+                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Version: 1.2.5 (Release)" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="Version: 1.2.6 (Release)" FontSize="12" Margin="0,0,0,4"/>
                                 <TextBlock Text="Build: 2026.08.02-WPF" FontSize="12" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="TxtAdbVersionInfo" Text="ADB Binary: Platform Tools 34.0.5" FontSize="12"/>
                             </StackPanel>
                         </Border>
 
-                        <Button Content="📁 Open Logs Folder" Click="BtnOpenLogsFolder_Click" Padding="12,6" Style="{StaticResource FluxGhostButton}" HorizontalAlignment="Left"/>
+                        <Button Content="📁 Open Logs Folder" Click="BtnOpenLogsFolder_Click" Padding="12,6" Style="{DynamicResource FluxGhostButton}" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
@@ -249,8 +249,8 @@
 
         <!-- BOTTOM BUTTON BAR -->
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <Button Content="Cancel" Click="BtnCancel_Click" Width="90" Height="32" Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}"/>
-            <Button Content="Save Settings" Click="BtnSave_Click" Width="120" Height="32" Style="{StaticResource FluxPrimaryButton}"/>
+            <Button Content="Cancel" Click="BtnCancel_Click" Width="90" Height="32" Margin="0,0,10,0" Style="{DynamicResource FluxGhostButton}"/>
+            <Button Content="Save Settings" Click="BtnSave_Click" Width="120" Height="32" Style="{DynamicResource FluxPrimaryButton}"/>
         </StackPanel>
     </Grid>
 </Window>

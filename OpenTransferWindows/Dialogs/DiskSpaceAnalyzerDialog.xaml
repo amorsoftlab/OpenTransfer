@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Android Disk Space Analyzer" Height="650" Width="780"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
-        Background="{StaticResource FluxSurface}" Foreground="{StaticResource FluxOnSurface}"
+        Background="{DynamicResource FluxSurface}" Foreground="{DynamicResource FluxOnSurface}"
         FontFamily="Inter, Segoe UI, sans-serif">
 
     <Grid Margin="20">
@@ -15,10 +15,10 @@
         </Grid.RowDefinitions>
 
         <!-- 1. STORAGE CAPACITY OVERVIEW CARD -->
-        <Border Grid.Row="0" Background="{StaticResource FluxSurfaceContainerLowest}"
-                BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1"
-                CornerRadius="{StaticResource FluxRadiusLg}" Padding="20,16" Margin="0,0,0,16"
-                Effect="{StaticResource FluxShadowLevel2}">
+        <Border Grid.Row="0" Background="{DynamicResource FluxSurfaceContainerLowest}"
+                BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1"
+                CornerRadius="{DynamicResource FluxRadiusLg}" Padding="20,16" Margin="0,0,0,16"
+                Effect="{DynamicResource FluxShadowLevel2}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -30,31 +30,31 @@
                 <Grid Grid.Row="0" Margin="0,0,0,8">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="📊" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Storage Capacity Analyzer" Style="{StaticResource FluxHeadlineMd}" FontSize="18"/>
+                        <TextBlock Text="Storage Capacity Analyzer" Style="{DynamicResource FluxHeadlineMd}" FontSize="18"/>
                     </StackPanel>
-                    <TextBlock x:Name="TxtCapacityPercent" Text="--%" Style="{StaticResource FluxTitleMd}"
-                               FontWeight="Bold" Foreground="{StaticResource FluxPrimaryContainer}"
+                    <TextBlock x:Name="TxtCapacityPercent" Text="--%" Style="{DynamicResource FluxTitleMd}"
+                               FontWeight="Bold" Foreground="{DynamicResource FluxPrimaryContainer}"
                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
 
                 <!-- Storage Progress Bar -->
-                <ProgressBar Grid.Row="1" x:Name="PrgStorageMeter" Style="{StaticResource FluxProgressBar}" Height="8" Margin="0,0,0,8"/>
+                <ProgressBar Grid.Row="1" x:Name="PrgStorageMeter" Style="{DynamicResource FluxProgressBar}" Height="8" Margin="0,0,0,8"/>
 
                 <!-- Storage Stats Text -->
                 <Grid Grid.Row="2">
                     <TextBlock x:Name="TxtStorageDetails" Text="Loading storage details..."
-                               Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                               Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     <TextBlock x:Name="TxtFreeSpaceText" Text="Free Space: --"
-                               Style="{StaticResource FluxBodySm}" FontWeight="SemiBold"
-                               Foreground="{StaticResource FluxPrimaryContainer}" HorizontalAlignment="Right"/>
+                               Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource FluxPrimaryContainer}" HorizontalAlignment="Right"/>
                 </Grid>
             </Grid>
         </Border>
 
         <!-- 2. TOOLBAR & BREADCRUMB NAVIGATION -->
-        <Border Grid.Row="1" Background="{StaticResource FluxSurfaceContainerLowest}"
-                BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1"
-                CornerRadius="{StaticResource FluxRadius}" Padding="12,8" Margin="0,0,0,12">
+        <Border Grid.Row="1" Background="{DynamicResource FluxSurfaceContainerLowest}"
+                BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1"
+                CornerRadius="{DynamicResource FluxRadius}" Padding="12,8" Margin="0,0,0,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -65,46 +65,46 @@
 
                 <!-- Parent Folder Button -->
                 <Button Grid.Column="0" Content="↑ Parent" Click="BtnUpFolder_Click"
-                        Style="{StaticResource FluxActionButton}" Margin="0,0,10,0"/>
+                        Style="{DynamicResource FluxActionButton}" Margin="0,0,10,0"/>
 
                 <!-- Breadcrumb Path Pill -->
-                <Border Grid.Column="1" Background="{StaticResource FluxSurfaceContainer}"
-                        CornerRadius="{StaticResource FluxRadius}" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Border Grid.Column="1" Background="{DynamicResource FluxSurfaceContainer}"
+                        CornerRadius="{DynamicResource FluxRadius}" Padding="10,4" Margin="0,0,10,0" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="📱" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtCurrentPath" Text="/sdcard" Style="{StaticResource FluxBodySm}"
-                                   FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurface}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtCurrentPath" Text="/sdcard" Style="{DynamicResource FluxBodySm}"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurface}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Filter Box -->
-                <Border Grid.Column="2" Background="{StaticResource FluxSurfaceContainer}"
-                        CornerRadius="{StaticResource FluxRadius}" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Border Grid.Column="2" Background="{DynamicResource FluxSurfaceContainer}"
+                        CornerRadius="{DynamicResource FluxRadius}" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center">
                     <Grid Width="160">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="12" Foreground="{StaticResource FluxOutline}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="12" Foreground="{DynamicResource FluxOutline}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <TextBox Grid.Column="1" x:Name="TxtSearchFilter" TextChanged="TxtSearchFilter_TextChanged"
                                  BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
-                                 FontSize="12" Foreground="{StaticResource FluxOnSurface}" ToolTip="Search scanned items"/>
+                                 FontSize="12" Foreground="{DynamicResource FluxOnSurface}" ToolTip="Search scanned items"/>
                     </Grid>
                 </Border>
 
                 <!-- Refresh Button -->
                 <Button Grid.Column="3" Content="🔄 Rescan" Click="BtnRescan_Click"
-                        Style="{StaticResource FluxPrimaryButton}" Padding="12,6"/>
+                        Style="{DynamicResource FluxPrimaryButton}" Padding="12,6"/>
             </Grid>
         </Border>
 
         <!-- 3. RANKED SPACE HOGGERS LISTVIEW -->
-        <Grid Grid.Row="2" Background="{StaticResource FluxSurfaceContainerLowest}">
-            <ListView x:Name="LstDiskUsage" Background="Transparent" Foreground="{StaticResource FluxOnSurface}"
+        <Grid Grid.Row="2" Background="{DynamicResource FluxSurfaceContainerLowest}">
+            <ListView x:Name="LstDiskUsage" Background="Transparent" Foreground="{DynamicResource FluxOnSurface}"
                       SelectionMode="Single" MouseDoubleClick="LstDiskUsage_MouseDoubleClick"
                       BorderThickness="0" FontSize="13" FontFamily="Inter, Segoe UI, sans-serif">
                 <ListView.ContextMenu>
-                    <ContextMenu Style="{StaticResource FluxContextMenu}">
+                    <ContextMenu Style="{DynamicResource FluxContextMenu}">
                         <MenuItem Header="📁 Drill Down into Folder" Click="ContextDrillDown_Click"/>
                         <MenuItem Header="🗑️ Delete Item" Click="ContextDelete_Click"/>
                     </ContextMenu>
@@ -117,7 +117,7 @@
                         <!-- RANK Column -->
                         <GridViewColumn Width="65">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="RANK" Style="{StaticResource FluxColumnHeader}"/>
+                                <GridViewColumnHeader Content="RANK" Style="{DynamicResource FluxColumnHeader}"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -130,7 +130,7 @@
                         <!-- NAME Column -->
                         <GridViewColumn Width="260">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="ITEM NAME" Style="{StaticResource FluxColumnHeader}"/>
+                                <GridViewColumnHeader Content="ITEM NAME" Style="{DynamicResource FluxColumnHeader}"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -164,7 +164,7 @@
                                                 </ContentControl.Style>
                                             </ContentControl>
                                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                                       Style="{StaticResource FluxBodyMd}" FontWeight="SemiBold"
+                                                       Style="{DynamicResource FluxBodyMd}" FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis" MaxWidth="220"/>
                                         </StackPanel>
                                     </DataTemplate>
@@ -174,7 +174,7 @@
                         <!-- USAGE PERCENTAGE Column -->
                         <GridViewColumn Width="220">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="SPACE USAGE %" Style="{StaticResource FluxColumnHeader}"/>
+                                <GridViewColumnHeader Content="SPACE USAGE %" Style="{DynamicResource FluxColumnHeader}"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -184,9 +184,9 @@
                                             <ColumnDefinition Width="50"/>
                                         </Grid.ColumnDefinitions>
                                         <ProgressBar Grid.Column="0" Value="{Binding UsagePercentage, Mode=OneWay}"
-                                                     Style="{StaticResource FluxProgressBar}" Height="6" VerticalAlignment="Center"/>
+                                                     Style="{DynamicResource FluxProgressBar}" Height="6" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="1" Text="{Binding FormattedPercentage}"
-                                                   Style="{StaticResource FluxBodySm}" FontWeight="SemiBold"
+                                                   Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
                                 </DataTemplate>
@@ -196,13 +196,13 @@
                         <!-- CONSUMED SIZE Column -->
                         <GridViewColumn Width="150">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="TOTAL CONSUMED" Style="{StaticResource FluxColumnHeader}"
+                                <GridViewColumnHeader Content="TOTAL CONSUMED" Style="{DynamicResource FluxColumnHeader}"
                                                       HorizontalContentAlignment="Right"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding FormattedSize}" Style="{StaticResource FluxBodySm}"
-                                               FontWeight="Bold" Foreground="{StaticResource FluxOnSurface}"
+                                    <TextBlock Text="{Binding FormattedSize}" Style="{DynamicResource FluxBodySm}"
+                                               FontWeight="Bold" Foreground="{DynamicResource FluxOnSurface}"
                                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
@@ -216,9 +216,9 @@
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="⚡" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                     <TextBlock x:Name="TxtLoadingStatus" Text="Analyzing disk space consumption..."
-                               Style="{StaticResource FluxTitleMd}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Scanning directory tree via ADB..." Style="{StaticResource FluxBodySm}"
-                               Foreground="{StaticResource FluxOnSurfaceVariant}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                               Style="{DynamicResource FluxTitleMd}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Scanning directory tree via ADB..." Style="{DynamicResource FluxBodySm}"
+                               Foreground="{DynamicResource FluxOnSurfaceVariant}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                 </StackPanel>
             </Grid>
         </Grid>
@@ -226,8 +226,8 @@
         <!-- 4. FOOTER -->
         <Border Grid.Row="3" Padding="0,14,0,0">
             <Grid>
-                <TextBlock x:Name="TxtStatusSummary" Text="Ready" Style="{StaticResource FluxBodySm}" VerticalAlignment="Center"/>
-                <Button Content="Close" Click="BtnClose_Click" Style="{StaticResource FluxGhostButton}"
+                <TextBlock x:Name="TxtStatusSummary" Text="Ready" Style="{DynamicResource FluxBodySm}" VerticalAlignment="Center"/>
+                <Button Content="Close" Click="BtnClose_Click" Style="{DynamicResource FluxGhostButton}"
                         Width="100" Height="34" HorizontalAlignment="Right"/>
             </Grid>
         </Border>

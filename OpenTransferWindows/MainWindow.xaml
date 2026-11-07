@@ -20,8 +20,8 @@
         <!-- Tile DataTemplate for Grid View -->
         <DataTemplate x:Key="TileItemTemplate">
             <Border Width="115" Height="110" Margin="5" Padding="6" CornerRadius="8"
-                    Background="{StaticResource FluxSurfaceContainerLowest}"
-                    BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1">
+                    Background="{DynamicResource FluxSurfaceContainerLowest}"
+                    BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -59,13 +59,13 @@
                     </ContentControl>
 
                     <!-- Filename -->
-                    <TextBlock Grid.Row="1" Text="{Binding DisplayName}" Style="{StaticResource FluxBodySm}"
+                    <TextBlock Grid.Row="1" Text="{Binding DisplayName}" Style="{DynamicResource FluxBodySm}"
                                FontWeight="SemiBold" TextAlignment="Center"
                                TextTrimming="CharacterEllipsis" MaxHeight="32" Margin="0,4,0,2"/>
 
                     <!-- Size -->
                     <TextBlock Grid.Row="2" Text="{Binding FormattedSize}" FontSize="10"
-                               Foreground="{StaticResource FluxOutline}" TextAlignment="Center"/>
+                               Foreground="{DynamicResource FluxOutline}" TextAlignment="Center"/>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -73,7 +73,7 @@
         <!-- Settings Sidebar Tab Button Style with Green Hover -->
         <Style x:Key="SettingsTabButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource FluxOnSurface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FluxOnSurface}"/>
             <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -112,7 +112,7 @@
         </Grid.RowDefinitions>
 
         <!-- HEADER BAR: Navigation, Location Path Pill & Search -->
-        <Border Grid.Row="0" Padding="14,10" Background="{StaticResource FluxSurface}">
+        <Border Grid.Row="0" Padding="14,10" Background="{DynamicResource FluxSurface}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -123,13 +123,13 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Navigation Arrows ← → ↑ -->
-                <Button Grid.Column="0" Content="←" Style="{StaticResource FluxNavButton}" Click="BtnBack_Click" ToolTip="Back" Margin="0,0,2,0"/>
-                <Button Grid.Column="1" Content="→" Style="{StaticResource FluxNavButton}" Click="BtnForward_Click" ToolTip="Forward" Margin="0,0,2,0"/>
-                <Button Grid.Column="2" Content="↑" Style="{StaticResource FluxNavButton}" Click="BtnUp_Click" ToolTip="Parent Folder" Margin="0,0,10,0"/>
+                <Button Grid.Column="0" Content="←" Style="{DynamicResource FluxNavButton}" Click="BtnBack_Click" ToolTip="Back" Margin="0,0,2,0"/>
+                <Button Grid.Column="1" Content="→" Style="{DynamicResource FluxNavButton}" Click="BtnForward_Click" ToolTip="Forward" Margin="0,0,2,0"/>
+                <Button Grid.Column="2" Content="↑" Style="{DynamicResource FluxNavButton}" Click="BtnUp_Click" ToolTip="Parent Folder" Margin="0,0,10,0"/>
 
                 <!-- Location Path Pill Bar (Matching Target UI Screenshot) -->
-                <Border Grid.Column="3" Background="{StaticResource FluxSurfaceContainer}"
-                        CornerRadius="{StaticResource FluxRadiusXl}" Padding="12,4" Margin="0,0,12,0" VerticalAlignment="Center">
+                <Border Grid.Column="3" Background="{DynamicResource FluxSurfaceContainer}"
+                        CornerRadius="{DynamicResource FluxRadiusXl}" Padding="12,4" Margin="0,0,12,0" VerticalAlignment="Center">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -141,107 +141,107 @@
                         <ComboBox Grid.Column="1" x:Name="CmbDevices" SelectionChanged="CmbDevices_SelectionChanged"
                                   BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                   FontFamily="Inter, Segoe UI, sans-serif" FontSize="13" FontWeight="Bold"
-                                  Foreground="{StaticResource FluxOnSurface}" Margin="0,0,8,0"/>
+                                  Foreground="{DynamicResource FluxOnSurface}" Margin="0,0,8,0"/>
                         <ComboBox Grid.Column="2" x:Name="CmbStorageRoots" SelectionChanged="CmbStorageRoots_SelectionChanged"
                                   BorderThickness="0" Background="Transparent" MinWidth="90" Margin="0,0,8,0"
-                                  Foreground="{StaticResource FluxOnSurfaceVariant}" ToolTip="Storage location"/>
+                                  Foreground="{DynamicResource FluxOnSurfaceVariant}" ToolTip="Storage location"/>
                         <TextBox Grid.Column="3" x:Name="TxtPath" Text="/sdcard" KeyDown="TxtPath_KeyDown"
                                  BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                  FontFamily="Inter, Segoe UI, sans-serif" FontSize="12"
-                                 Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                 Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </Grid>
                 </Border>
 
                 <!-- Pill-Shaped Search Bar -->
-                <Border Grid.Column="4" Background="{StaticResource FluxSurfaceContainer}"
-                        CornerRadius="{StaticResource FluxRadiusXl}" Padding="12,4" VerticalAlignment="Center">
+                <Border Grid.Column="4" Background="{DynamicResource FluxSurfaceContainer}"
+                        CornerRadius="{DynamicResource FluxRadiusXl}" Padding="12,4" VerticalAlignment="Center">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="13" Foreground="{StaticResource FluxOutline}"
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="13" Foreground="{DynamicResource FluxOutline}"
                                    VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <TextBox Grid.Column="1" x:Name="TxtSearch" TextChanged="TxtSearch_TextChanged"
                                  BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                  FontFamily="Inter, Segoe UI, sans-serif" FontSize="13"
-                                 Foreground="{StaticResource FluxOnSurface}" ToolTip="Search; filters: ext:jpg min:10MB max:1GB after:2026-01-01"/>
+                                 Foreground="{DynamicResource FluxOnSurface}" ToolTip="Search; filters: ext:jpg min:10MB max:1GB after:2026-01-01"/>
                     </Grid>
                 </Border>
             </Grid>
         </Border>
 
         <!-- ACTION TOOLBAR -->
-        <Border Grid.Row="1" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,1"
-                Padding="14,6" Background="{StaticResource FluxSurface}">
+        <Border Grid.Row="1" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="0,1,0,1"
+                Padding="14,6" Background="{DynamicResource FluxSurface}">
             <StackPanel Orientation="Horizontal">
                 <ComboBox x:Name="CmbQuickAccess" Width="150" Margin="0,0,6,0" Padding="6,3"
                           SelectionChanged="CmbQuickAccess_SelectionChanged" ToolTip="Quick Access and pinned folders"/>
-                <Button Content="★" Click="BtnToggleFavorite_Click" Style="{StaticResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
-                <Rectangle Width="1" Height="16" Fill="{StaticResource FluxOutlineVariant}" Margin="8,0"/>
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnNewFolder_Click">
+                <Button Content="★" Click="BtnToggleFavorite_Click" Style="{DynamicResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
+                <Rectangle Width="1" Height="16" Fill="{DynamicResource FluxOutlineVariant}" Margin="8,0"/>
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnNewFolder_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="📁" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
-                        <TextBlock Text="New Folder" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                        <TextBlock Text="📁" Margin="0,0,6,0" Foreground="{DynamicResource FluxPrimaryContainer}"/>
+                        <TextBlock Text="New Folder" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
 
-                <Rectangle Width="1" Height="16" Fill="{StaticResource FluxOutlineVariant}" Margin="8,0"/>
+                <Rectangle Width="1" Height="16" Fill="{DynamicResource FluxOutlineVariant}" Margin="8,0"/>
 
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnRename_Click">
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnRename_Click">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="✏️" Margin="0,0,6,0"/>
-                        <TextBlock Text="Rename" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                        <TextBlock Text="Rename" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnDelete_Click">
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnDelete_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🗑️" Margin="0,0,6,0" Foreground="{StaticResource FluxError}"/>
-                        <TextBlock Text="Delete" Foreground="{StaticResource FluxError}"/>
+                        <TextBlock Text="🗑️" Margin="0,0,6,0" Foreground="{DynamicResource FluxError}"/>
+                        <TextBlock Text="Delete" Foreground="{DynamicResource FluxError}"/>
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnRefreshDevice_Click">
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnRefreshDevice_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔄" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
-                        <TextBlock Text="Refresh" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                        <TextBlock Text="🔄" Margin="0,0,6,0" Foreground="{DynamicResource FluxPrimaryContainer}"/>
+                        <TextBlock Text="Refresh" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
 
-                <Rectangle Width="1" Height="16" Fill="{StaticResource FluxOutlineVariant}" Margin="8,0"/>
+                <Rectangle Width="1" Height="16" Fill="{DynamicResource FluxOutlineVariant}" Margin="8,0"/>
 
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnDiskAnalyzer_Click">
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnDiskAnalyzer_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="📊" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
-                        <TextBlock Text="Storage Analyzer" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                        <TextBlock Text="📊" Margin="0,0,6,0" Foreground="{DynamicResource FluxPrimaryContainer}"/>
+                        <TextBlock Text="Storage Analyzer" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource FluxActionButton}" Click="BtnDeleteEmptyFolders_Click">
+                <Button Style="{DynamicResource FluxActionButton}" Click="BtnDeleteEmptyFolders_Click">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🧹" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
-                        <TextBlock Text="Clean Empty Folders" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                        <TextBlock Text="🧹" Margin="0,0,6,0" Foreground="{DynamicResource FluxPrimaryContainer}"/>
+                        <TextBlock Text="Clean Empty Folders" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Border>
 
         <!-- MAIN VIEW CONTAINER (FILE EXPLORER OR IN-APP SETTINGS) -->
-        <Grid Grid.Row="2" Background="{StaticResource FluxSurfaceContainerLowest}">
+        <Grid Grid.Row="2" Background="{DynamicResource FluxSurfaceContainerLowest}">
             <!-- 1. FILE EXPLORER VIEW -->
             <Grid x:Name="PnlFileExplorer" Visibility="Visible">
                 <!-- Background Watermark Android Mascot Logo -->
                 <TextBlock Text="🤖" FontSize="320" Foreground="#04000000" HorizontalAlignment="Right"
                            VerticalAlignment="Center" Margin="0,0,40,0" IsHitTestVisible="False"/>
 
-                <ListView x:Name="LstFiles" Background="Transparent" Foreground="{StaticResource FluxOnSurface}"
+                <ListView x:Name="LstFiles" Background="Transparent" Foreground="{DynamicResource FluxOnSurface}"
                           SelectionMode="Extended" SelectionChanged="LstFiles_SelectionChanged"
                           AllowDrop="True" Drop="LstFiles_Drop" DragOver="LstFiles_DragOver"
                           MouseDoubleClick="LstFiles_MouseDoubleClick" BorderThickness="0"
                           FontSize="13" FontFamily="Inter, Segoe UI, sans-serif">
                     <ListView.ContextMenu>
-                        <ContextMenu Style="{StaticResource FluxContextMenu}">
+                        <ContextMenu Style="{DynamicResource FluxContextMenu}">
                             <MenuItem Header="📥 Download to PC..." Click="BtnCopyToPC_Click"/>
                             <MenuItem Header="📤 Upload Files Here..." Click="BtnUploadFiles_Click"/>
                             <MenuItem Header="👁 Preview / Open File" Click="BtnPreviewFile_Click"/>
@@ -271,7 +271,7 @@
                             <!-- NAME Column -->
                             <GridViewColumn Width="420">
                                 <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="NAME" Style="{StaticResource FluxColumnHeader}"/>
+                                    <GridViewColumnHeader Content="NAME" Style="{DynamicResource FluxColumnHeader}"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -311,7 +311,7 @@
                                             </ContentControl>
 
                                             <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
-                                                       Style="{StaticResource FluxBodyMd}" FontWeight="SemiBold"/>
+                                                       Style="{DynamicResource FluxBodyMd}" FontWeight="SemiBold"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -320,11 +320,11 @@
                             <!-- LAST MODIFIED Column -->
                             <GridViewColumn Width="240">
                                 <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="LAST MODIFIED" Style="{StaticResource FluxColumnHeader}"/>
+                                    <GridViewColumnHeader Content="LAST MODIFIED" Style="{DynamicResource FluxColumnHeader}"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding ModifiedDateStr}" Style="{StaticResource FluxBodySm}"/>
+                                        <TextBlock Text="{Binding ModifiedDateStr}" Style="{DynamicResource FluxBodySm}"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -332,12 +332,12 @@
                             <!-- SIZE Column -->
                             <GridViewColumn Width="140">
                                 <GridViewColumn.Header>
-                                    <GridViewColumnHeader Content="SIZE" Style="{StaticResource FluxColumnHeader}"
+                                    <GridViewColumnHeader Content="SIZE" Style="{DynamicResource FluxColumnHeader}"
                                                           HorizontalContentAlignment="Right"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding FormattedSize}" Style="{StaticResource FluxBodySm}"
+                                        <TextBlock Text="{Binding FormattedSize}" Style="{DynamicResource FluxBodySm}"
                                                    HorizontalAlignment="Right"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -348,36 +348,36 @@
 
                 <!-- NO DEVICE CONNECTED EMPTY STATE -->
                 <Border x:Name="PnlNoDevice" Visibility="Collapsed"
-                        Background="{StaticResource FluxSurfaceContainerLowest}"
-                        BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1"
-                        CornerRadius="{StaticResource FluxRadiusLg}"
+                        Background="{DynamicResource FluxSurfaceContainerLowest}"
+                        BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1"
+                        CornerRadius="{DynamicResource FluxRadiusLg}"
                         Width="380" HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Padding="28" Effect="{StaticResource FluxShadowLevel2}">
+                        Padding="28" Effect="{DynamicResource FluxShadowLevel2}">
                     <StackPanel HorizontalAlignment="Center">
-                        <Border Width="72" Height="72" Background="{StaticResource FluxSurfaceContainer}"
+                        <Border Width="72" Height="72" Background="{DynamicResource FluxSurfaceContainer}"
                                 CornerRadius="16" HorizontalAlignment="Center" Margin="0,0,0,20">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="🔌" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Border Width="22" Height="22" Background="{StaticResource FluxError}" CornerRadius="11"
+                                <Border Width="22" Height="22" Background="{DynamicResource FluxError}" CornerRadius="11"
                                         HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-4,-4">
                                     <TextBlock Text="⚡" FontSize="11" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <TextBlock Text="No Device Connected" Style="{StaticResource FluxHeadlineMd}"
+                        <TextBlock Text="No Device Connected" Style="{DynamicResource FluxHeadlineMd}"
                                    HorizontalAlignment="Center" Margin="0,0,0,8"/>
                         <TextBlock Text="Connect your device via USB and make sure it's unlocked with File Transfer mode enabled."
-                                   Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"
+                                   Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}"
                                    TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,20"/>
 
                         <Button Content="🔄 Try Again" Click="BtnRefreshDevice_Click"
-                                Style="{StaticResource FluxPrimaryButton}" Height="38" Margin="0,0,0,10"/>
+                                Style="{DynamicResource FluxPrimaryButton}" Height="38" Margin="0,0,0,10"/>
 
                         <Button Content="View Troubleshooting Guide" Click="BtnTroubleshoot_Click"
-                                Style="{StaticResource FluxGhostButton}" Height="36" Margin="0,0,0,20"/>
+                                Style="{DynamicResource FluxGhostButton}" Height="36" Margin="0,0,0,20"/>
 
-                        <Border Background="{StaticResource FluxSurfaceContainerLow}" CornerRadius="{StaticResource FluxRadius}" Padding="12,10">
+                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" CornerRadius="{DynamicResource FluxRadius}" Padding="12,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -385,7 +385,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="💡" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Top"/>
                                 <TextBlock Grid.Column="1" Text="Tip: If your device isn't showing up, try a different USB port or original manufacturer cable."
-                                           Style="{StaticResource FluxBodySm}" FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                           Style="{DynamicResource FluxBodySm}" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                             </Grid>
                         </Border>
                     </StackPanel>
@@ -393,7 +393,7 @@
             </Grid>
 
             <!-- 2. IN-APP SETTINGS VIEW OVERLAY -->
-            <Grid x:Name="PnlSettingsView" Visibility="Collapsed" Background="{StaticResource FluxSurface}">
+            <Grid x:Name="PnlSettingsView" Visibility="Collapsed" Background="{DynamicResource FluxSurface}">
                 <Grid Margin="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -402,12 +402,12 @@
                     </Grid.RowDefinitions>
 
                     <!-- SETTINGS TOP BAR -->
-                    <Border Grid.Row="0" Margin="0,0,0,12" Padding="4,0,4,8" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,0,0,1">
+                    <Border Grid.Row="0" Margin="0,0,0,12" Padding="4,0,4,8" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="0,0,0,1">
                         <Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button Content="← Back to Files" Click="BtnHideSettings_Click"
-                                        Style="{StaticResource FluxGhostButton}" Padding="10,6" Margin="0,0,16,0"/>
-                                <TextBlock Text="⚙️  Application Settings" Style="{StaticResource FluxHeadlineMd}" VerticalAlignment="Center"/>
+                                        Style="{DynamicResource FluxGhostButton}" Padding="10,6" Margin="0,0,16,0"/>
+                                <TextBlock Text="⚙️  Application Settings" Style="{DynamicResource FluxHeadlineMd}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -420,7 +420,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- LEFT SIDEBAR CATEGORY MENU -->
-                        <Border Grid.Column="0" Background="{StaticResource FluxSurfaceContainerLow}"
+                        <Border Grid.Column="0" Background="{DynamicResource FluxSurfaceContainerLow}"
                                 CornerRadius="8" Margin="0,0,12,0" Padding="6">
                             <StackPanel x:Name="PnlCategoryMenu">
                                 <Button x:Name="TabGeneral" Content="⚙️  General" Click="TabButton_Click" Tag="0"
@@ -441,13 +441,13 @@
                         </Border>
 
                         <!-- RIGHT CONTENT PANELS -->
-                        <Border Grid.Column="1" Background="{StaticResource FluxSurfaceContainerLowest}"
-                                CornerRadius="8" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1" Padding="20">
+                        <Border Grid.Column="1" Background="{DynamicResource FluxSurfaceContainerLowest}"
+                                CornerRadius="8" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1" Padding="20">
                             <Grid>
                                 <!-- 0. GENERAL PANEL -->
                                 <ScrollViewer x:Name="PnlGeneral" Visibility="Visible" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="Startup &amp; Background Behavior" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Startup &amp; Background Behavior" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                                         <CheckBox x:Name="ChkLaunchStartup" Content="Launch at Windows startup" Margin="0,0,0,10"/>
                                         <CheckBox x:Name="ChkMinimizeTray" Content="Minimize to system tray on close" Margin="0,0,0,10"/>
                                         <CheckBox x:Name="ChkAutoDetect" Content="Auto detect Android USB devices" IsChecked="True" Margin="0,0,0,10"/>
@@ -458,7 +458,7 @@
                                 <!-- 1. APPEARANCE PANEL -->
                                 <ScrollViewer x:Name="PnlAppearance" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="Theme Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Theme Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                                         <TextBlock Text="Premium Color Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbThemePalette" SelectedIndex="0" Margin="0,0,0,12" Padding="8,4" SelectionChanged="AppearanceTheme_SelectionChanged">
                                             <ComboBoxItem Content="Emerald Glass"/>
@@ -474,12 +474,12 @@
                                             <ComboBoxItem Content="Dark"/>
                                         </ComboBox>
 
-                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" BorderBrush="{StaticResource FluxOutlineVariant}"
+                                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" BorderBrush="{DynamicResource FluxOutlineVariant}"
                                                 BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                                             <StackPanel>
-                                                <TextBlock Text="Live theme preview" FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurface}"/>
+                                                <TextBlock Text="Live theme preview" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurface}"/>
                                                 <TextBlock Text="Surfaces, cards, navigation, selections and progress accents update instantly."
-                                                           FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                           FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                                             </StackPanel>
                                         </Border>
 
@@ -498,7 +498,7 @@
                                 <!-- 2. TRANSFERS PANEL -->
                                 <ScrollViewer x:Name="PnlTransfers" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="File Transfer &amp; Conflict Policies" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="File Transfer &amp; Conflict Policies" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
                                         
                                         <TextBlock Text="Conflict Resolution (When File Exists):" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbConflict" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
@@ -531,7 +531,7 @@
                                 <!-- 3. DEVICE PANEL -->
                                 <ScrollViewer x:Name="PnlDevice" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="Device &amp; Storage Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Device &amp; Storage Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                                         <TextBlock Text="Default Storage Location:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbDefaultStorage" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
@@ -551,7 +551,7 @@
                                 <!-- 4. EXPLORER PANEL -->
                                 <ScrollViewer x:Name="PnlExplorer" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="File Explorer Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="File Explorer Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                                         <TextBlock Text="Default Startup View:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbDefaultView" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
@@ -569,7 +569,7 @@
                                         <CheckBox x:Name="ChkCreateMissing" Content="Create missing folders automatically" IsChecked="True" Margin="0,0,0,6"/>
 
                                         <!-- AUTO-SPLIT ON TRANSFER CARD -->
-                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,10,0,6">
+                                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,10,0,6">
                                             <StackPanel>
                                                 <CheckBox x:Name="ChkAutoSplit" Content="⚡ Automatically split files into batch subfolders on transfer" IsChecked="False" Margin="0,0,0,8" FontWeight="SemiBold"/>
                                                 <Grid Margin="20,2,0,0">
@@ -578,7 +578,7 @@
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                                        <TextBlock Text="Batch Size (Files/Folder):" FontSize="11.5" Margin="0,0,0,4" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                        <TextBlock Text="Batch Size (Files/Folder):" FontSize="11.5" Margin="0,0,0,4" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                                                         <ComboBox x:Name="CmbAutoSplitSize" SelectedIndex="2" Padding="6,3">
                                                             <ComboBoxItem Content="100 files"/>
                                                             <ComboBoxItem Content="250 files"/>
@@ -587,7 +587,7 @@
                                                         </ComboBox>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                                        <TextBlock Text="Folder Naming Style:" FontSize="11.5" Margin="0,0,0,4" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                                        <TextBlock Text="Folder Naming Style:" FontSize="11.5" Margin="0,0,0,4" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                                                         <ComboBox x:Name="CmbAutoSplitNaming" SelectedIndex="0" Padding="6,3">
                                                             <ComboBoxItem Content="photo-1, photo-2..."/>
                                                             <ComboBoxItem Content="day 1-1, day 1-2..."/>
@@ -602,7 +602,7 @@
                                 <!-- 5. ADVANCED PANEL -->
                                 <ScrollViewer x:Name="PnlAdvanced" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
-                                        <TextBlock Text="Advanced ADB Configuration" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
+                                        <TextBlock Text="Advanced ADB Configuration" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
 
                                         <TextBlock Text="ADB Executable Path:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <Grid Margin="0,0,0,14">
@@ -611,7 +611,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBox x:Name="TxtCustomAdbPath" Padding="8,6" FontSize="12"/>
-                                            <Button Grid.Column="1" Content="Browse..." Click="BtnBrowseAdb_Click" Margin="8,0,0,0" Padding="12,4" Style="{StaticResource FluxGhostButton}"/>
+                                            <Button Grid.Column="1" Content="Browse..." Click="BtnBrowseAdb_Click" Margin="8,0,0,0" Padding="12,4" Style="{DynamicResource FluxGhostButton}"/>
                                         </Grid>
 
                                         <TextBlock Text="ADB Operation Timeout:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
@@ -627,10 +627,10 @@
                                             <ComboBoxItem Content="7 days"/><ComboBoxItem Content="14 days"/><ComboBoxItem Content="30 days"/><ComboBoxItem Content="90 days"/>
                                         </ComboBox>
                                         <WrapPanel>
-                                            <Button Content="Export Settings" Click="BtnExportSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
-                                            <Button Content="Import Settings" Click="BtnImportSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
-                                            <Button Content="Reset Settings" Click="BtnResetSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
-                                            <Button Content="Clear Log Files" Click="BtnClearLogFiles_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Export Settings" Click="BtnExportSettings_Click" Style="{DynamicResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Import Settings" Click="BtnImportSettings_Click" Style="{DynamicResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Reset Settings" Click="BtnResetSettings_Click" Style="{DynamicResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Clear Log Files" Click="BtnClearLogFiles_Click" Style="{DynamicResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
                                         </WrapPanel>
                                     </StackPanel>
                                 </ScrollViewer>
@@ -641,12 +641,12 @@
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                             <Image Source="Assets/logo.png" Width="48" Height="48" Margin="0,0,12,0"/>
                                             <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="Open Transfer" Style="{StaticResource FluxTitleMd}" FontWeight="Bold"/>
-                                                <TextBlock Text="Native High-Speed Android USB File Transfer" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOutline}"/>
+                                                <TextBlock Text="Open Transfer" Style="{DynamicResource FluxTitleMd}" FontWeight="Bold"/>
+                                                <TextBlock Text="Native High-Speed Android USB File Transfer" Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOutline}"/>
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
+                                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
                                             <StackPanel>
                                                 <TextBlock x:Name="TxtAboutVersion" Text="Version: --" FontSize="12" Margin="0,0,0,4"/>
                                                 <TextBlock Text="Build: 2026.11.07" FontSize="12" Margin="0,0,0,4"/>
@@ -655,30 +655,30 @@
                                         </Border>
 
                                         <!-- DEVELOPER INFORMATION CARD -->
-                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="14" CornerRadius="8" Margin="0,0,0,16">
+                                        <Border Background="{DynamicResource FluxSurfaceContainerLow}" Padding="14" CornerRadius="8" Margin="0,0,0,16">
                                             <StackPanel>
-                                                <TextBlock Text="👨‍💻 Developer Information" Style="{StaticResource FluxBodySm}" FontWeight="Bold" Foreground="{StaticResource FluxOnSurface}" Margin="0,0,0,8"/>
+                                                <TextBlock Text="👨‍💻 Developer Information" Style="{DynamicResource FluxBodySm}" FontWeight="Bold" Foreground="{DynamicResource FluxOnSurface}" Margin="0,0,0,8"/>
                                                 
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                    <TextBlock Text="👤 Developer:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                                                    <TextBlock Text="Jaseem Mhd" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurface}"/>
+                                                    <TextBlock Text="👤 Developer:" Width="110" Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="Jaseem Mhd" Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurface}"/>
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                    <TextBlock Text="📸 Instagram:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                                                    <TextBlock Text="magical_world_i_see" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnInstagram_Click"/>
+                                                    <TextBlock Text="📸 Instagram:" Width="110" Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="magical_world_i_see" Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnInstagram_Click"/>
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="🐙 GitHub:" Width="110" Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                                                    <TextBlock Text="github.com/amorsoftlab/OpenTransfer" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnGitHubProfile_Click"/>
+                                                    <TextBlock Text="🐙 GitHub:" Width="110" Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                                                    <TextBlock Text="github.com/amorsoftlab/OpenTransfer" Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}" Cursor="Hand" MouseLeftButtonDown="BtnGitHubProfile_Click"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                            <Button Content="🔄 Check for Updates Now" Click="BtnCheckUpdates_Click" Padding="12,6" Style="{StaticResource FluxPrimaryButton}" Margin="0,0,10,0"/>
-                                            <Button Content="📁 Open Logs Folder" Click="BtnOpenLogsFolder_Click" Padding="12,6" Style="{StaticResource FluxGhostButton}"/>
+                                            <Button Content="🔄 Check for Updates Now" Click="BtnCheckUpdates_Click" Padding="12,6" Style="{DynamicResource FluxPrimaryButton}" Margin="0,0,10,0"/>
+                                            <Button Content="📁 Open Logs Folder" Click="BtnOpenLogsFolder_Click" Padding="12,6" Style="{DynamicResource FluxGhostButton}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </ScrollViewer>
@@ -688,8 +688,8 @@
 
                     <!-- BOTTOM BUTTON BAR -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                        <Button Content="Cancel" Click="BtnHideSettings_Click" Width="90" Height="32" Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}"/>
-                        <Button Content="Save Settings" Click="BtnSaveSettings_Click" Width="120" Height="32" Style="{StaticResource FluxPrimaryButton}"/>
+                        <Button Content="Cancel" Click="BtnHideSettings_Click" Width="90" Height="32" Margin="0,0,10,0" Style="{DynamicResource FluxGhostButton}"/>
+                        <Button Content="Save Settings" Click="BtnSaveSettings_Click" Width="120" Height="32" Style="{DynamicResource FluxPrimaryButton}"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -697,8 +697,8 @@
 
         <!-- COLLAPSIBLE ACTIVITY LOG DRAWER -->
         <Border Grid.Row="3" x:Name="PnlActivityLogs" Visibility="Collapsed"
-                Background="{StaticResource FluxSurfaceContainerLowest}"
-                BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="14,10">
+                Background="{DynamicResource FluxSurfaceContainerLowest}"
+                BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="14,10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -706,31 +706,31 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="0,0,0,6">
-                    <TextBlock Text="ACTIVITY LOGS" Style="{StaticResource FluxLabelMd}" VerticalAlignment="Center"/>
+                    <TextBlock Text="ACTIVITY LOGS" Style="{DynamicResource FluxLabelMd}" VerticalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="📋 Copy" Click="BtnCopyLogs_Click" Foreground="{StaticResource FluxOnSurfaceVariant}"
+                        <Button Content="📋 Copy" Click="BtnCopyLogs_Click" Foreground="{DynamicResource FluxOnSurfaceVariant}"
                                 Background="Transparent" BorderThickness="0"
                                 FontFamily="Inter, Segoe UI, sans-serif" FontSize="12" Cursor="Hand" Margin="0,0,12,0"/>
-                        <Button Content="🗑️ Clear" Click="BtnClearLogs_Click" Foreground="{StaticResource FluxOnSurfaceVariant}"
+                        <Button Content="🗑️ Clear" Click="BtnClearLogs_Click" Foreground="{DynamicResource FluxOnSurfaceVariant}"
                                 Background="Transparent" BorderThickness="0"
                                 FontFamily="Inter, Segoe UI, sans-serif" FontSize="12" Cursor="Hand" Margin="0,0,12,0"/>
-                        <Button Content="✕" Click="BtnToggleLogs_Click" Foreground="{StaticResource FluxOutline}"
+                        <Button Content="✕" Click="BtnToggleLogs_Click" Foreground="{DynamicResource FluxOutline}"
                                 Background="Transparent" BorderThickness="0"
                                 FontFamily="Inter, Segoe UI, sans-serif" FontSize="14" FontWeight="Bold" Cursor="Hand"/>
                     </StackPanel>
                 </Grid>
 
                 <TextBox Grid.Row="1" x:Name="TxtLogConsole"
-                         Background="{StaticResource FluxSurfaceContainerLow}"
-                         Foreground="{StaticResource FluxOnSurfaceVariant}"
+                         Background="{DynamicResource FluxSurfaceContainerLow}"
+                         Foreground="{DynamicResource FluxOnSurfaceVariant}"
                          FontFamily="Consolas" FontSize="11"
                          IsReadOnly="True" VerticalScrollBarVisibility="Auto"
-                         BorderThickness="1" BorderBrush="{StaticResource FluxOutlineVariant}" Padding="8"/>
+                         BorderThickness="1" BorderBrush="{DynamicResource FluxOutlineVariant}" Padding="8"/>
             </Grid>
         </Border>
 
         <!-- BOTTOM STATUS FOOTER BAR (Matching Exact Target UI Screenshot) -->
-        <Border Grid.Row="4" Background="{StaticResource FluxSurface}" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="16,8">
+        <Border Grid.Row="4" Background="{DynamicResource FluxSurface}" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="16,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -745,43 +745,43 @@
                         <TextBlock Text="Connected" FontSize="12" FontWeight="SemiBold" Foreground="#10B981" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <Rectangle Width="1" Height="14" Fill="{StaticResource FluxOutlineVariant}" Margin="14,0"/>
+                    <Rectangle Width="1" Height="14" Fill="{DynamicResource FluxOutlineVariant}" Margin="14,0"/>
 
                     <!-- Items Count -->
-                    <TextBlock x:Name="TxtStatusFooter" Text="15 Items" FontSize="12" Foreground="{StaticResource FluxOnSurfaceVariant}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtStatusFooter" Text="15 Items" FontSize="12" Foreground="{DynamicResource FluxOnSurfaceVariant}" VerticalAlignment="Center"/>
 
-                    <Rectangle Width="1" Height="14" Fill="{StaticResource FluxOutlineVariant}" Margin="14,0"/>
+                    <Rectangle Width="1" Height="14" Fill="{DynamicResource FluxOutlineVariant}" Margin="14,0"/>
 
                     <!-- Selected Stats (Highlighted in Vibrant Primary Blue #005FB8) -->
-                    <TextBlock x:Name="TxtSelectedStats" Text="1 Selected" FontSize="12" FontWeight="Bold" Foreground="{StaticResource FluxPrimaryContainer}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtSelectedStats" Text="1 Selected" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource FluxPrimaryContainer}" VerticalAlignment="Center"/>
 
-                    <Rectangle Width="1" Height="14" Fill="{StaticResource FluxOutlineVariant}" Margin="14,0"/>
+                    <Rectangle Width="1" Height="14" Fill="{DynamicResource FluxOutlineVariant}" Margin="14,0"/>
 
                     <!-- Free Storage Info (Clickable to open Disk Analyzer) -->
                     <Border Cursor="Hand" MouseDown="TxtFreeStorage_MouseDown"
                             ToolTip="Click to open Storage Space Analyzer" Padding="4,2"
                             Background="Transparent" CornerRadius="4">
                         <TextBlock x:Name="TxtFreeStorage" Text="Free --" FontSize="12"
-                                   FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}"
                                    VerticalAlignment="Center"/>
                     </Border>
                 </StackPanel>
 
                 <!-- Right Controls: Settings + Logs Button + Grid/List View Toggle -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Style="{StaticResource FluxActionButton}" Click="BtnSettings_Click" Padding="8,4" Margin="0,0,10,0" ToolTip="Settings">
+                    <Button Style="{DynamicResource FluxActionButton}" Click="BtnSettings_Click" Padding="8,4" Margin="0,0,10,0" ToolTip="Settings">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚙️" Margin="0,0,6,0" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                            <TextBlock Text="Settings" Foreground="{StaticResource FluxOnSurface}" FontSize="12" FontWeight="Medium"/>
+                            <TextBlock Text="⚙️" Margin="0,0,6,0" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                            <TextBlock Text="Settings" Foreground="{DynamicResource FluxOnSurface}" FontSize="12" FontWeight="Medium"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource FluxActionButton}" Click="BtnToggleLogs_Click" Padding="8,4" Margin="0,0,14,0">
+                    <Button Style="{DynamicResource FluxActionButton}" Click="BtnToggleLogs_Click" Padding="8,4" Margin="0,0,14,0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📄" Margin="0,0,6,0" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                            <TextBlock Text="Logs" Foreground="{StaticResource FluxOnSurface}" FontSize="12" FontWeight="Medium"/>
+                            <TextBlock Text="📄" Margin="0,0,6,0" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                            <TextBlock Text="Logs" Foreground="{DynamicResource FluxOnSurface}" FontSize="12" FontWeight="Medium"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource FluxActionButton}" Click="BtnHistory_Click" Padding="8,4" Margin="0,0,10,0" ToolTip="Transfer History">
+                    <Button Style="{DynamicResource FluxActionButton}" Click="BtnHistory_Click" Padding="8,4" Margin="0,0,10,0" ToolTip="Transfer History">
                         <StackPanel Orientation="Horizontal"><TextBlock Text="🕘" Margin="0,0,5,0"/><TextBlock Text="History"/></StackPanel>
                     </Button>
 
@@ -790,13 +790,13 @@
                         <!-- Grid View Icon -->
                         <Button x:Name="BtnGridView" Click="BtnGridView_Click" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" Margin="0,0,4,0" ToolTip="Grid View">
                             <Border x:Name="BdrGridView" Background="Transparent" CornerRadius="4" Padding="6,4">
-                                <TextBlock x:Name="TxtGridViewIcon" Text="㗊" FontSize="14" Foreground="{StaticResource FluxOutline}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="TxtGridViewIcon" Text="㗊" FontSize="14" Foreground="{DynamicResource FluxOutline}" VerticalAlignment="Center"/>
                             </Border>
                         </Button>
 
                         <!-- List View Icon (Active Blue Pill State by Default) -->
                         <Button x:Name="BtnListView" Click="BtnListView_Click" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" ToolTip="List View">
-                            <Border x:Name="BdrListView" Background="{StaticResource FluxPrimaryContainer}" CornerRadius="4" Padding="8,4">
+                            <Border x:Name="BdrListView" Background="{DynamicResource FluxPrimaryContainer}" CornerRadius="4" Padding="8,4">
                                 <TextBlock x:Name="TxtListViewIcon" Text=":=" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                             </Border>
                         </Button>

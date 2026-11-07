@@ -1512,8 +1512,11 @@ namespace openTransferWPF
 
         private void SetBrush(string key, string hex)
         {
-            if (FindResource(key) is SolidColorBrush brush)
-                brush.Color = (Color)ColorConverter.ConvertFromString(hex);
+            var color = (Color)ColorConverter.ConvertFromString(hex);
+            // Brushes loaded through compiled XAML may be frozen by WPF. Replacing
+            // the application resource is safe and updates every DynamicResource
+            // consumer; mutating a frozen brush crashes during window startup.
+            Application.Current.Resources[key] = new SolidColorBrush(color);
         }
 
         private static void CleanupOldLogs(int retentionDays)

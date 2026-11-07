@@ -1,6 +1,6 @@
 ; Script generated for Inno Setup Installer - OpenTransfer
 #define MyAppName "OpenTransfer"
-#define MyAppVersion "1.2.5"
+#define MyAppVersion "1.2.6"
 #define MyAppPublisher "AmorSoftLab"
 #define MyAppURL "https://github.com/amorsoftlab/OpenTransfer"
 #define MyAppExeName "openTransferWPF.exe"

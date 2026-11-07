@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="File Transfer" Height="450" Width="480"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource FluxSurfaceContainerLowest}" Foreground="{StaticResource FluxOnSurface}"
+        Background="{DynamicResource FluxSurfaceContainerLowest}" Foreground="{DynamicResource FluxOnSurface}"
         FontFamily="Inter, Segoe UI, sans-serif">
 
     <Grid Margin="24">
@@ -24,41 +24,41 @@
             <Grid Grid.Row="0" Margin="0,0,0,16">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="TxtHeader" Text="Copying files..."
-                               Style="{StaticResource FluxTitleMd}" FontWeight="Bold" FontSize="18"/>
+                               Style="{DynamicResource FluxTitleMd}" FontWeight="Bold" FontSize="18"/>
                     <TextBlock x:Name="TxtSubHeader" Text="Android Device ↔ PC"
-                               Style="{StaticResource FluxBodySm}" Foreground="{StaticResource FluxOnSurfaceVariant}" Margin="0,2,0,0"/>
+                               Style="{DynamicResource FluxBodySm}" Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,2,0,0"/>
                 </StackPanel>
                 <TextBlock Text="📄" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top"
-                           Foreground="{StaticResource FluxPrimaryContainer}" Opacity="0.8"/>
+                           Foreground="{DynamicResource FluxPrimaryContainer}" Opacity="0.8"/>
             </Grid>
 
             <!-- Direction-aware device-to-device transfer animation -->
             <Border Grid.Row="1" Height="82" Margin="0,0,0,14" CornerRadius="12"
-                    Background="{StaticResource FluxSurfaceContainerLow}"
-                    BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="1" ClipToBounds="True">
+                    Background="{DynamicResource FluxSurfaceContainerLow}"
+                    BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1" ClipToBounds="True">
                 <Grid Margin="14,8">
                     <Canvas x:Name="TransferCanvas" Height="64">
                         <!-- Source device -->
                         <Border x:Name="SourceDevice" Canvas.Left="2" Canvas.Top="7" Width="42" Height="50"
-                                Background="{StaticResource FluxSurfaceContainerLowest}"
-                                BorderBrush="{StaticResource FluxOutline}" BorderThickness="2" CornerRadius="7">
+                                Background="{DynamicResource FluxSurfaceContainerLowest}"
+                                BorderBrush="{DynamicResource FluxOutline}" BorderThickness="2" CornerRadius="7">
                             <Grid>
                                 <TextBlock x:Name="TxtSourceDevice" Text="📱" FontSize="23"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource FluxOutline}"
+                                <Ellipse Width="3" Height="3" Fill="{DynamicResource FluxOutline}"
                                          HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
                             </Grid>
                         </Border>
 
                         <!-- Track -->
                         <Rectangle Canvas.Left="48" Canvas.Top="31" Width="296" Height="2" RadiusX="1" RadiusY="1"
-                                   Fill="{StaticResource FluxOutlineVariant}"/>
+                                   Fill="{DynamicResource FluxOutlineVariant}"/>
                         <Rectangle Canvas.Left="48" Canvas.Top="31" Width="296" Height="2" RadiusX="1" RadiusY="1"
-                                   Fill="{StaticResource FluxPrimaryContainer}" Opacity="0.28"/>
+                                   Fill="{DynamicResource FluxPrimaryContainer}" Opacity="0.28"/>
 
                         <!-- Moving file card -->
                         <Border x:Name="AnimatedFile" Canvas.Left="50" Canvas.Top="16" Width="32" Height="32"
-                                Background="{StaticResource FluxPrimaryContainer}" CornerRadius="7"
+                                Background="{DynamicResource FluxPrimaryContainer}" CornerRadius="7"
                                 RenderTransformOrigin="0.5,0.5">
                             <Border.RenderTransform>
                                 <TransformGroup>
@@ -71,7 +71,7 @@
 
                         <!-- Trailing data particles -->
                         <Ellipse x:Name="ParticleOne" Canvas.Left="54" Canvas.Top="29" Width="6" Height="6"
-                                 Fill="{StaticResource FluxPrimaryContainer}" Opacity="0.7">
+                                 Fill="{DynamicResource FluxPrimaryContainer}" Opacity="0.7">
                             <Ellipse.RenderTransform><TranslateTransform x:Name="ParticleOneTranslate"/></Ellipse.RenderTransform>
                         </Ellipse>
                         <Ellipse x:Name="ParticleTwo" Canvas.Left="54" Canvas.Top="29" Width="4" Height="4"
@@ -81,13 +81,13 @@
 
                         <!-- Target computer -->
                         <Border x:Name="TargetDevice" Canvas.Left="348" Canvas.Top="9" Width="54" Height="42"
-                                Background="{StaticResource FluxSurfaceContainerLowest}"
-                                BorderBrush="{StaticResource FluxOutline}" BorderThickness="2" CornerRadius="5">
+                                Background="{DynamicResource FluxSurfaceContainerLowest}"
+                                BorderBrush="{DynamicResource FluxOutline}" BorderThickness="2" CornerRadius="5">
                             <TextBlock x:Name="TxtTargetDevice" Text="🖥️" FontSize="24"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <Rectangle Canvas.Left="364" Canvas.Top="52" Width="22" Height="3" RadiusX="1"
-                                   Fill="{StaticResource FluxOutline}"/>
+                                   Fill="{DynamicResource FluxOutline}"/>
                     </Canvas>
                 </Grid>
             </Border>
@@ -96,38 +96,38 @@
             <StackPanel Grid.Row="2" Margin="0,0,0,14">
                 <Grid Margin="0,0,0,4">
                     <TextBlock x:Name="TxtCurrentFile" Text="Preparing transfer..."
-                               Style="{StaticResource FluxBodySm}" FontWeight="Medium"
-                               Foreground="{StaticResource FluxOnSurface}" TextTrimming="CharacterEllipsis" Margin="0,0,130,0"/>
+                               Style="{DynamicResource FluxBodySm}" FontWeight="Medium"
+                               Foreground="{DynamicResource FluxOnSurface}" TextTrimming="CharacterEllipsis" Margin="0,0,130,0"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBlock x:Name="TxtCurrentFileBytes" Text="0 B / 0 B" Style="{StaticResource FluxBodySm}"
-                                   Foreground="{StaticResource FluxOnSurfaceVariant}" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="TxtCurrentFilePercent" Text="0%" Style="{StaticResource FluxBodySm}"
-                                   FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}"/>
+                        <TextBlock x:Name="TxtCurrentFileBytes" Text="0 B / 0 B" Style="{DynamicResource FluxBodySm}"
+                                   Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtCurrentFilePercent" Text="0%" Style="{DynamicResource FluxBodySm}"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}"/>
                     </StackPanel>
                 </Grid>
-                <ProgressBar x:Name="PrgFileBar" Style="{StaticResource FluxProgressBar}" Height="4" Margin="0,0,0,4"/>
-                <TextBlock Text="Current file progress" Style="{StaticResource FluxBodySm}"
-                           FontSize="11" Foreground="{StaticResource FluxOutline}"/>
+                <ProgressBar x:Name="PrgFileBar" Style="{DynamicResource FluxProgressBar}" Height="4" Margin="0,0,0,4"/>
+                <TextBlock Text="Current file progress" Style="{DynamicResource FluxBodySm}"
+                           FontSize="11" Foreground="{DynamicResource FluxOutline}"/>
             </StackPanel>
 
             <!-- Total Progress Section -->
             <StackPanel Grid.Row="3" Margin="0,0,0,16">
                 <Grid Margin="0,0,0,4">
-                    <TextBlock Text="Total Progress" Style="{StaticResource FluxBodySm}" FontWeight="SemiBold"
-                               Foreground="{StaticResource FluxOnSurface}"/>
+                    <TextBlock Text="Total Progress" Style="{DynamicResource FluxBodySm}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource FluxOnSurface}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBlock x:Name="TxtTotalBytes" Text="0 B / 0 B" Style="{StaticResource FluxBodySm}"
-                                   FontWeight="Medium" Foreground="{StaticResource FluxOnSurface}" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="TxtTotalPercent" Text="0%" Style="{StaticResource FluxBodySm}"
-                                   FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}"/>
+                        <TextBlock x:Name="TxtTotalBytes" Text="0 B / 0 B" Style="{DynamicResource FluxBodySm}"
+                                   FontWeight="Medium" Foreground="{DynamicResource FluxOnSurface}" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtTotalPercent" Text="0%" Style="{DynamicResource FluxBodySm}"
+                                   FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}"/>
                     </StackPanel>
                 </Grid>
-                <ProgressBar x:Name="PrgBar" Style="{StaticResource FluxProgressBar}" Height="6" Margin="0,0,0,4"/>
+                <ProgressBar x:Name="PrgBar" Style="{DynamicResource FluxProgressBar}" Height="6" Margin="0,0,0,4"/>
                 <Grid>
-                    <TextBlock x:Name="TxtRemainingSize" Text="📦 Remaining: 0 B" Style="{StaticResource FluxBodySm}"
-                               FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
-                    <TextBlock x:Name="TxtFileCountRatio" Text="0 / 0 items" Style="{StaticResource FluxBodySm}"
-                               FontSize="11" Foreground="{StaticResource FluxOutline}" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="TxtRemainingSize" Text="📦 Remaining: 0 B" Style="{DynamicResource FluxBodySm}"
+                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
+                    <TextBlock x:Name="TxtFileCountRatio" Text="0 / 0 items" Style="{DynamicResource FluxBodySm}"
+                               FontSize="11" Foreground="{DynamicResource FluxOutline}" HorizontalAlignment="Right"/>
                 </Grid>
             </StackPanel>
 
@@ -139,22 +139,22 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock x:Name="TxtSpeed" Text="⚡ 0 MB/s" Style="{StaticResource FluxBodySm}"
-                               FontWeight="SemiBold" Foreground="{StaticResource FluxPrimaryContainer}" Margin="0,0,12,0"/>
-                    <TextBlock x:Name="TxtSkipped" Text="✨ 0 Skipped" Style="{StaticResource FluxBodySm}"
-                               Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                    <TextBlock x:Name="TxtSpeed" Text="⚡ 0 MB/s" Style="{DynamicResource FluxBodySm}"
+                               FontWeight="SemiBold" Foreground="{DynamicResource FluxPrimaryContainer}" Margin="0,0,12,0"/>
+                    <TextBlock x:Name="TxtSkipped" Text="✨ 0 Skipped" Style="{DynamicResource FluxBodySm}"
+                               Foreground="{DynamicResource FluxOnSurfaceVariant}"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="1" x:Name="TxtEta" Text="Calculating..." Style="{StaticResource FluxBodySm}"
-                           Foreground="{StaticResource FluxOnSurfaceVariant}" HorizontalAlignment="Right"/>
+                <TextBlock Grid.Column="1" x:Name="TxtEta" Text="Calculating..." Style="{DynamicResource FluxBodySm}"
+                           Foreground="{DynamicResource FluxOnSurfaceVariant}" HorizontalAlignment="Right"/>
             </Grid>
 
             <!-- Action Buttons -->
             <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="BtnPause" Content="Pause" Click="BtnPause_Click" Width="90" Height="32"
-                        Margin="0,0,10,0" Style="{StaticResource FluxGhostButton}" Padding="0"/>
+                        Margin="0,0,10,0" Style="{DynamicResource FluxGhostButton}" Padding="0"/>
                 <Button x:Name="BtnCancel" Content="Cancel" Click="BtnCancel_Click" Width="90" Height="32"
-                        Style="{StaticResource FluxPrimaryButton}" Padding="0"/>
+                        Style="{DynamicResource FluxPrimaryButton}" Padding="0"/>
             </StackPanel>
         </Grid>
 
@@ -164,27 +164,27 @@
         <Grid x:Name="PnlCompleteState" Visibility="Collapsed" VerticalAlignment="Center">
             <StackPanel HorizontalAlignment="Center">
                 <!-- Checkmark Icon Box -->
-                <Border Width="64" Height="64" Background="{StaticResource FluxSurfaceContainer}"
+                <Border Width="64" Height="64" Background="{DynamicResource FluxSurfaceContainer}"
                         CornerRadius="16" HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <TextBlock Text="✓" FontSize="32" FontWeight="Bold" Foreground="{StaticResource FluxPrimaryContainer}"
+                    <TextBlock Text="✓" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource FluxPrimaryContainer}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
 
                 <!-- Title & Description -->
-                <TextBlock Text="Transfer Complete" Style="{StaticResource FluxHeadlineMd}"
+                <TextBlock Text="Transfer Complete" Style="{DynamicResource FluxHeadlineMd}"
                            HorizontalAlignment="Center" Margin="0,0,0,8"/>
                 <TextBlock x:Name="TxtCompleteMessage"
                            Text="All selected files have been successfully transferred to your local computer."
-                           Style="{StaticResource FluxBodyMd}" Foreground="{StaticResource FluxOnSurfaceVariant}"
+                           Style="{DynamicResource FluxBodyMd}" Foreground="{DynamicResource FluxOnSurfaceVariant}"
                            TextAlignment="Center" TextWrapping="Wrap" MaxWidth="360" Margin="0,0,0,24"/>
 
                 <!-- Action Buttons -->
                 <Button x:Name="BtnOpenFolder" Content="📁 Open Folder" Click="BtnOpenFolder_Click"
-                        Style="{StaticResource FluxPrimaryButton}" Width="280" Height="38" Margin="0,0,0,10"/>
+                        Style="{DynamicResource FluxPrimaryButton}" Width="280" Height="38" Margin="0,0,0,10"/>
                 <Button x:Name="BtnShowFailed" Content="⚠ Show Failed Files" Click="BtnShowFailed_Click"
-                        Style="{StaticResource FluxGhostButton}" Width="280" Height="36" Margin="0,0,0,8" Visibility="Collapsed"/>
+                        Style="{DynamicResource FluxGhostButton}" Width="280" Height="36" Margin="0,0,0,8" Visibility="Collapsed"/>
                 <Button Content="Done" Click="BtnDone_Click"
-                        Style="{StaticResource FluxGhostButton}" Width="280" Height="36"/>
+                        Style="{DynamicResource FluxGhostButton}" Width="280" Height="36"/>
             </StackPanel>
         </Grid>
     </Grid>
