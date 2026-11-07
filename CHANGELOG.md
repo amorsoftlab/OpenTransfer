@@ -4,6 +4,14 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.10] - 2026-11-07
+
+### 🛠️ Hotfix
+- Fixed unreadable sidebar labels/icons when hovering over unselected settings tabs.
+- Hover text now uses each theme's matching high-contrast on-primary color.
+
+---
+
 ## [1.2.9] - 2026-11-07
 
 ### 🎨 Themes

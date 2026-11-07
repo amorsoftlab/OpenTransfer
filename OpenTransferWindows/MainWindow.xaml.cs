@@ -1101,7 +1101,6 @@ namespace openTransferWPF
 
             var greenBrush = (System.Windows.Media.Brush)FindResource("FluxPrimary");
             var onPrimaryBrush = (System.Windows.Media.Brush)FindResource("FluxOnPrimary");
-            var onSurfaceBrush = (System.Windows.Media.Brush)FindResource("FluxOnSurface");
 
             for (int i = 0; i < _settingsTabButtons.Length; i++)
             {
@@ -1114,7 +1113,9 @@ namespace openTransferWPF
                 else
                 {
                     _settingsTabButtons[i].Background = System.Windows.Media.Brushes.Transparent;
-                    _settingsTabButtons[i].Foreground = onSurfaceBrush;
+                    // Clear the local value so the style's hover trigger can supply
+                    // FluxOnPrimary. A local Foreground would otherwise win over it.
+                    _settingsTabButtons[i].ClearValue(Control.ForegroundProperty);
                     _settingsPanels[i].Visibility = Visibility.Collapsed;
                 }
             }

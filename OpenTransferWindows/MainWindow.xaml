@@ -71,7 +71,7 @@
             </Border>
         </DataTemplate>
 
-        <!-- Settings Sidebar Tab Button Style with Green Hover -->
+        <!-- Settings sidebar tab button with theme-aware hover contrast. -->
         <Style x:Key="SettingsTabButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource FluxOnSurface}"/>
@@ -95,6 +95,10 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource FluxPrimary}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource FluxOnPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="TabBorder" Property="Background" Value="Transparent"/>
+                                <Setter Property="Opacity" Value="0.38"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
