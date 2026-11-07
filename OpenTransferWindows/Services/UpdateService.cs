@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -54,7 +56,7 @@ namespace openTransferWPF.Services
                 string tagName = root.GetProperty("tag_name").GetString() ?? string.Empty;
                 string cleanVersion = tagName.TrimStart('v', 'V');
                 info.LatestVersion = cleanVersion;
-                info.ReleaseNotes = root.GetProperty("body").GetString() ?? "New stability and performance improvements.";
+                info.ReleaseNotes = FormatReleaseNotes(root.GetProperty("body").GetString());
                 info.HtmlUrl = root.GetProperty("html_url").GetString() ?? "https://github.com/amorsoftlab/OpenTransfer";
 
                 // Find download asset URL
@@ -91,6 +93,19 @@ namespace openTransferWPF.Services
                 return latest > current;
             }
             return string.Compare(latestStr, currentStr, StringComparison.OrdinalIgnoreCase) > 0;
+        }
+
+        private static string FormatReleaseNotes(string? markdown)
+        {
+            if (string.IsNullOrWhiteSpace(markdown)) return "New stability and performance improvements.";
+            string text = WebUtility.HtmlDecode(markdown).Replace("\r", "");
+            text = Regex.Replace(text, @"\[([^\]]+)\]\([^\)]+\)", "$1");
+            text = Regex.Replace(text, @"(?m)^#{1,6}\s*", "");
+            text = Regex.Replace(text, @"\*\*([^*]+)\*\*", "$1");
+            text = Regex.Replace(text, @"(?m)^[-*]\s+", "• ");
+            text = Regex.Replace(text, @"(?m)^Full Changelog:\s*", "Full changelog: ");
+            text = Regex.Replace(text, @"\n{3,}", "\n\n").Trim();
+            return text;
         }
 
         public async Task<string> DownloadUpdateAsync(string downloadUrl, Action<long, long> progressCallback)

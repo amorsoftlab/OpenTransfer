@@ -15,6 +15,7 @@ All notable changes to **OpenTransfer** will be documented in this file.
 - **Settings & Diagnostics:** Export/import/reset, launch-at-startup, tray support, ADB timeout, debug logging, and configurable log retention/cleanup.
 
 ### 🛠️ Fixed & Improved
+- Update dialog now converts GitHub Markdown into clean readable text instead of displaying raw `**`, headings, and link syntax.
 - **Reliable Metadata & Sizes:** Replaced device-specific `ls` parsing with stable `find`/`stat`; file names with spaces, file sizes, optional folder sizes, and modified dates now resolve correctly.
 - **Live Storage Information:** Free capacity refreshes during polling, manual refreshes, navigation, and transfer completion; removable SD cards are detected automatically.
 - **Settings Wiring:** Folder colors, explorer visibility, refresh interval, reconnect, comparison, retry, verification, metadata preservation, and structure settings now affect runtime behavior.
