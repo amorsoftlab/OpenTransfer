@@ -4,6 +4,18 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.7] - 2026-11-07
+
+### 🛠️ Hotfix
+- Expanded Appearance to 12 premium theme families, each with Light, Dark, and Follow Windows modes: Emerald Glass, VS Code, Nord Aurora, Dracula, Tokyo Night, Catppuccin, Rosé Pine, Solarized, One Dark, GitHub, Monokai, and Cyberpunk.
+- No-device header controls now show disabled placeholders instead of blank combo boxes and empty dropdown popups.
+- USB-only detection is now the default; wireless ADB/mDNS devices require an explicit Advanced setting and are labeled as Wi-Fi.
+- Connection footer now reflects the real state instead of always showing a hard-coded Connected badge.
+- Removed the hard-coded Redmi Note 7 Pro startup log and title.
+- Offline and unauthorized ADB entries are no longer treated as connected devices.
+
+---
+
 ## [1.2.6] - 2026-11-07
 
 ### 🛠️ Hotfix

@@ -177,7 +177,7 @@
             <StackPanel Orientation="Horizontal">
                 <ComboBox x:Name="CmbQuickAccess" Width="150" Margin="0,0,6,0" Padding="6,3"
                           SelectionChanged="CmbQuickAccess_SelectionChanged" ToolTip="Quick Access and pinned folders"/>
-                <Button Content="★" Click="BtnToggleFavorite_Click" Style="{DynamicResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
+                <Button x:Name="BtnToggleFavorite" Content="★" Click="BtnToggleFavorite_Click" Style="{DynamicResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
                 <Rectangle Width="1" Height="16" Fill="{DynamicResource FluxOutlineVariant}" Margin="8,0"/>
                 <Button Style="{DynamicResource FluxActionButton}" Click="BtnNewFolder_Click">
                     <StackPanel Orientation="Horizontal">
@@ -465,6 +465,14 @@
                                             <ComboBoxItem Content="VS Code"/>
                                             <ComboBoxItem Content="Nord Aurora"/>
                                             <ComboBoxItem Content="Dracula"/>
+                                            <ComboBoxItem Content="Tokyo Night"/>
+                                            <ComboBoxItem Content="Catppuccin"/>
+                                            <ComboBoxItem Content="Rosé Pine"/>
+                                            <ComboBoxItem Content="Solarized"/>
+                                            <ComboBoxItem Content="One Dark"/>
+                                            <ComboBoxItem Content="GitHub"/>
+                                            <ComboBoxItem Content="Monokai"/>
+                                            <ComboBoxItem Content="Cyberpunk"/>
                                         </ComboBox>
 
                                         <TextBlock Text="Theme Appearance:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
@@ -622,6 +630,7 @@
                                         </ComboBox>
 
                                         <CheckBox x:Name="ChkDebugLogging" Content="Enable Debug Logging" Margin="0,0,0,6"/>
+                                        <CheckBox x:Name="ChkWirelessDevices" Content="Show Wireless ADB devices (Wi-Fi debugging)" Margin="0,0,0,6"/>
                                         <TextBlock Text="Log Retention:" FontSize="12.5" FontWeight="SemiBold" Margin="0,8,0,6"/>
                                         <ComboBox x:Name="CmbLogRetention" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
                                             <ComboBoxItem Content="7 days"/><ComboBoxItem Content="14 days"/><ComboBoxItem Content="30 days"/><ComboBoxItem Content="90 days"/>
@@ -741,8 +750,8 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Connected Badge -->
                     <StackPanel Orientation="Horizontal" x:Name="PnlStatusConnected">
-                        <TextBlock Text="🟢" FontSize="10" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <TextBlock Text="Connected" FontSize="12" FontWeight="SemiBold" Foreground="#10B981" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtConnectionDot" Text="⚪" FontSize="10" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBlock x:Name="TxtConnectionStatus" Text="No Device" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FluxOutline}" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <Rectangle Width="1" Height="14" Fill="{DynamicResource FluxOutlineVariant}" Margin="14,0"/>

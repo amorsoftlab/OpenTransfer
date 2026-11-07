@@ -13,7 +13,7 @@ namespace openTransferWPF.Models
 
         // --- APPEARANCE ---
         public string Theme { get; set; } = "System"; // Legacy setting retained for migration
-        public string ThemePalette { get; set; } = "Emerald"; // Emerald, VSCode, Nord, Dracula
+        public string ThemePalette { get; set; } = "Emerald";
         public string ThemeMode { get; set; } = "System"; // System, Light, Dark
         public string AccentColor { get; set; } = "#005fb8";
         public string FolderColor { get; set; } = "Yellow"; // "Yellow", "Blue", "Green", "Purple", "Red", "Orange"
@@ -53,6 +53,7 @@ namespace openTransferWPF.Models
         public string CustomAdbPath { get; set; } = string.Empty;
         public int AdbTimeoutSeconds { get; set; } = 30; // 30, 60, 120
         public bool EnableDebugLogging { get; set; } = false;
+        public bool EnableWirelessDevices { get; set; } = false;
         public int LogRetentionDays { get; set; } = 14;
     }
 }

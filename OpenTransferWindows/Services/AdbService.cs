@@ -81,6 +81,7 @@ namespace openTransferWPF.Services
                 {
                     string serial = parts[0];
                     string status = parts[1];
+                    if (!status.Equals("device", StringComparison.OrdinalIgnoreCase)) continue;
                     string model = serial;
 
                     foreach (var p in parts)

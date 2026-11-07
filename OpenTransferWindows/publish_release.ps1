@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 Set-Location $projectDir
 
-$version = "1.2.6"
+$version = "1.2.7"
 $tag = "v$version"
 $repoUrl = "https://github.com/amorsoftlab/OpenTransfer.git"
 
@@ -15,10 +15,11 @@ Write-Host "==================================================" -ForegroundColor
 
 # 1. Clean & Publish WPF App
 Write-Host "`n[1/5] Publishing WPF Binaries (win-x64)..." -ForegroundColor Yellow
-if (Test-Path "$projectDir\publish") { Remove-Item "$projectDir\publish" -Recurse -Force }
+$publishDir = "$projectDir\release_publish"
+if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 if (Test-Path "$projectDir\output") { Remove-Item "$projectDir\output" -Recurse -Force }
 
-dotnet publish openTransferWPF.csproj -c Release -r win-x64 --self-contained false -o "$projectDir\publish"
+dotnet publish openTransferWPF.csproj -c Release -r win-x64 --self-contained false -o $publishDir
 if ($LASTEXITCODE -ne 0) { Write-Error "dotnet publish failed!"; exit 1 }
 
 # Sync Version into installer.iss
@@ -49,7 +50,7 @@ if ($isccPath) {
     Write-Host "⚠️ ISCC.exe (Inno Setup Compiler) not found on system PATH." -ForegroundColor Yellow
     Write-Host "Creating fallback Release Zip package in output\..." -ForegroundColor Yellow
     New-Item -ItemType Directory -Force -Path "$projectDir\output" | Out-Null
-    Compress-Archive -Path "$projectDir\publish\*" -DestinationPath "$projectDir\output\OpenTransfer_v$version.zip" -Force
+    Compress-Archive -Path "$publishDir\*" -DestinationPath "$projectDir\output\OpenTransfer_v$version.zip" -Force
 }
 
 # 3. Git Remote Check

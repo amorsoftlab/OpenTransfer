@@ -1,6 +1,7 @@
 bin/
 obj/
 OpenTransferWindows/testpublish/
+OpenTransferWindows/release_publish/
 publish/
 release_output/
 *.user

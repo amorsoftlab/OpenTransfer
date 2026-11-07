@@ -54,7 +54,7 @@ namespace openTransferWPF
             _adbService = new AdbService();
             _copyEngine = new CopyEngine(_adbService);
 
-            Log("Connected to Redmi Note 7 Pro");
+            Log("OpenTransfer started. Waiting for an Android device...");
 
             // Device Polling Timer
             _deviceTimer = new DispatcherTimer
@@ -125,10 +125,14 @@ namespace openTransferWPF
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
                 TxtFreeStorage.Text = "Free --";
+                SetConnectionStatus(null);
+                SetDeviceControlsEnabled(false);
                 return;
             }
 
             var devices = await _adbService.GetDevicesAsync();
+            if (!SettingsService.Instance.Settings.EnableWirelessDevices)
+                devices = devices.Where(d => !d.IsWireless).ToList();
             if (devices.Count == 0)
             {
                 TxtStatusFooter.Text = "No Android device connected";
@@ -136,6 +140,8 @@ namespace openTransferWPF
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
                 TxtFreeStorage.Text = "Free --";
+                SetConnectionStatus(null);
+                SetDeviceControlsEnabled(false);
                 if (!string.IsNullOrEmpty(_activeSerial))
                 {
                     Log("🔴 Device Disconnected.");
@@ -150,6 +156,7 @@ namespace openTransferWPF
             {
                 PnlNoDevice.Visibility = Visibility.Collapsed;
                 LstFiles.Visibility = Visibility.Visible;
+                SetDeviceControlsEnabled(true);
                 CmbDevices.ItemsSource = devices;
                 CmbDevices.DisplayMemberPath = "DisplayName";
                 CmbDevices.SelectedValuePath = "Serial";
@@ -166,6 +173,7 @@ namespace openTransferWPF
                 else
                 {
                     CmbDevices.SelectedValue = _activeSerial;
+                    SetConnectionStatus(devices.FirstOrDefault(d => d.Serial == _activeSerial));
                     if (refreshStorage) await UpdateStorageInfoAsync();
                 }
             }
@@ -181,13 +189,52 @@ namespace openTransferWPF
                 {
                     _activeSerial = dev.Serial;
                     Title = $"Android File Transfer - {dev.Model}";
-                    Log($"Connected to {dev.Model}");
+                    Log($"Connected to {dev.Model} via {(dev.IsWireless ? "Wi-Fi" : "USB")}");
+                    SetConnectionStatus(dev);
                     _ = UpdateStorageInfoAsync();
                     _ = PopulateStorageRootsAsync();
                     RefreshQuickAccess();
                     _ = LoadDirectoryAsync(await GetStartupStoragePathAsync());
                 }
             }
+        }
+
+        private void SetConnectionStatus(DeviceItem? device)
+        {
+            if (device == null)
+            {
+                TxtConnectionDot.Text = "⚪";
+                TxtConnectionStatus.Text = "No Device";
+                TxtConnectionStatus.Foreground = (Brush)FindResource("FluxOutline");
+                Title = "OpenTransfer";
+                return;
+            }
+            TxtConnectionDot.Text = device.IsWireless ? "🔵" : "🟢";
+            TxtConnectionStatus.Text = device.IsWireless ? "Wireless" : "USB Connected";
+            TxtConnectionStatus.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(device.IsWireless ? "#3B82F6" : "#10B981"));
+        }
+
+        private void SetDeviceControlsEnabled(bool enabled)
+        {
+            CmbDevices.IsEnabled = enabled;
+            CmbStorageRoots.IsEnabled = enabled;
+            CmbQuickAccess.IsEnabled = enabled;
+            BtnToggleFavorite.IsEnabled = enabled;
+            TxtPath.IsEnabled = enabled;
+
+            if (enabled) return;
+            _updatingStorageRoots = true;
+            try
+            {
+                CmbDevices.ItemsSource = new[] { new DeviceItem { Model = "No device" } };
+                CmbDevices.SelectedIndex = 0;
+                CmbStorageRoots.ItemsSource = new[] { "No storage" };
+                CmbStorageRoots.SelectedIndex = 0;
+                CmbQuickAccess.ItemsSource = new[] { "Quick Access unavailable" };
+                CmbQuickAccess.SelectedIndex = 0;
+                TxtPath.Text = string.Empty;
+            }
+            finally { _updatingStorageRoots = false; }
         }
 
         private async Task UpdateStorageInfoAsync()
@@ -1085,6 +1132,14 @@ namespace openTransferWPF
                 "VSCode" => 1,
                 "Nord" => 2,
                 "Dracula" => 3,
+                "TokyoNight" => 4,
+                "Catppuccin" => 5,
+                "RosePine" => 6,
+                "Solarized" => 7,
+                "OneDark" => 8,
+                "GitHub" => 9,
+                "Monokai" => 10,
+                "Cyberpunk" => 11,
                 _ => 0
             };
             string themeMode = s.ThemeMode == "System" && s.Theme is "Light" or "Dark" ? s.Theme : s.ThemeMode;
@@ -1158,6 +1213,7 @@ namespace openTransferWPF
                 _ => 0
             };
             ChkDebugLogging.IsChecked = s.EnableDebugLogging;
+            ChkWirelessDevices.IsChecked = s.EnableWirelessDevices;
             CmbLogRetention.SelectedIndex = s.LogRetentionDays switch { 7 => 0, 30 => 2, 90 => 3, _ => 1 };
         }
 
@@ -1271,6 +1327,7 @@ namespace openTransferWPF
                     _ => 30
                 },
                 EnableDebugLogging = ChkDebugLogging.IsChecked == true
+                ,EnableWirelessDevices = ChkWirelessDevices.IsChecked == true
                 ,LogRetentionDays = CmbLogRetention.SelectedIndex switch { 0 => 7, 2 => 30, 3 => 90, _ => 14 }
                 ,FavoritePaths = SettingsService.Instance.Settings.FavoritePaths.ToList()
                 ,SortBy = SettingsService.Instance.Settings.SortBy
@@ -1413,6 +1470,14 @@ namespace openTransferWPF
             1 => "VSCode",
             2 => "Nord",
             3 => "Dracula",
+            4 => "TokyoNight",
+            5 => "Catppuccin",
+            6 => "RosePine",
+            7 => "Solarized",
+            8 => "OneDark",
+            9 => "GitHub",
+            10 => "Monokai",
+            11 => "Cyberpunk",
             _ => "Emerald"
         };
 
@@ -1468,6 +1533,22 @@ namespace openTransferWPF
                 ("Nord", true)    => new[] { "#88C0D0", "#2E3440", "#5E81AC", "#FFFFFF", "#242933", "#2E3440", "#343B49", "#3B4252", "#434C5E", "#ECEFF4", "#D8DEE9", "#AAB3C5", "#4C566A" },
                 ("Dracula", false)=> new[] { "#7C3AED", "#FFFFFF", "#6D28D9", "#FFFFFF", "#F8F7FC", "#FFFFFF", "#F1EFF8", "#EAE6F4", "#DDD7EC", "#282A36", "#56586A", "#727386", "#CEC9DB" },
                 ("Dracula", true) => new[] { "#BD93F9", "#282A36", "#8B5CF6", "#FFFFFF", "#1E1F29", "#282A36", "#30313D", "#383A4A", "#44475A", "#F8F8F2", "#D7D7D2", "#A8A8A2", "#55586D" },
+                ("TokyoNight", false) => new[] { "#34548A", "#FFFFFF", "#2E5C9A", "#FFFFFF", "#E9EDF5", "#FFFFFF", "#F3F5FA", "#E2E7F0", "#D8DEEA", "#1A1B26", "#4C556A", "#6B7488", "#C6CDDA" },
+                ("TokyoNight", true)  => new[] { "#7AA2F7", "#16161E", "#3D59A1", "#FFFFFF", "#16161E", "#1A1B26", "#1F2335", "#24283B", "#2F3549", "#C0CAF5", "#A9B1D6", "#7982A9", "#3B4261" },
+                ("Catppuccin", false) => new[] { "#8839EF", "#FFFFFF", "#7287FD", "#FFFFFF", "#EFF1F5", "#FFFFFF", "#F5F6FA", "#E6E9EF", "#DCE0E8", "#4C4F69", "#6C6F85", "#8C8FA1", "#CCD0DA" },
+                ("Catppuccin", true)  => new[] { "#CBA6F7", "#1E1E2E", "#89B4FA", "#1E1E2E", "#181825", "#1E1E2E", "#24243A", "#2A2A40", "#313244", "#CDD6F4", "#BAC2DE", "#9399B2", "#45475A" },
+                ("RosePine", false)   => new[] { "#907AA9", "#FFFFFF", "#B4637A", "#FFFFFF", "#FAF4ED", "#FFFAF3", "#F4EDE8", "#EDE5DF", "#E4DAD4", "#575279", "#797593", "#9893A5", "#DFD7D2" },
+                ("RosePine", true)    => new[] { "#C4A7E7", "#191724", "#9CCFD8", "#191724", "#15131E", "#191724", "#1F1D2E", "#26233A", "#2A273F", "#E0DEF4", "#908CAA", "#6E6A86", "#403D52" },
+                ("Solarized", false)  => new[] { "#268BD2", "#FFFFFF", "#2AA198", "#FFFFFF", "#FDF6E3", "#FFFDF5", "#F8F1DD", "#EEE8D5", "#E4DECB", "#073642", "#586E75", "#839496", "#D5CFBD" },
+                ("Solarized", true)   => new[] { "#2AA198", "#002B36", "#268BD2", "#FDF6E3", "#002B36", "#073642", "#0B3B46", "#124651", "#1B4F59", "#EEE8D5", "#93A1A1", "#657B83", "#30545D" },
+                ("OneDark", false)    => new[] { "#4078F2", "#FFFFFF", "#A626A4", "#FFFFFF", "#F5F5F5", "#FFFFFF", "#FAFAFA", "#EAEAEB", "#DEDFE1", "#383A42", "#696C77", "#818387", "#C8C9CB" },
+                ("OneDark", true)     => new[] { "#61AFEF", "#282C34", "#C678DD", "#FFFFFF", "#21252B", "#282C34", "#2C313A", "#333842", "#3E4451", "#ABB2BF", "#9DA5B4", "#7F848E", "#4B5263" },
+                ("GitHub", false)     => new[] { "#0969DA", "#FFFFFF", "#1F883D", "#FFFFFF", "#F6F8FA", "#FFFFFF", "#F6F8FA", "#EAEEF2", "#D8DEE4", "#1F2328", "#59636E", "#6E7781", "#D0D7DE" },
+                ("GitHub", true)      => new[] { "#58A6FF", "#0D1117", "#238636", "#FFFFFF", "#0D1117", "#161B22", "#1C2128", "#21262D", "#30363D", "#F0F6FC", "#B1BAC4", "#8B949E", "#30363D" },
+                ("Monokai", false)    => new[] { "#F92672", "#FFFFFF", "#66D9EF", "#272822", "#F8F8F2", "#FFFFFF", "#F4F4EC", "#EBEBE3", "#DEDED5", "#272822", "#5F5F57", "#77776F", "#CFCFC5" },
+                ("Monokai", true)     => new[] { "#A6E22E", "#272822", "#F92672", "#FFFFFF", "#1E1F1C", "#272822", "#2D2E2A", "#34352F", "#3E3D32", "#F8F8F2", "#CFCFC2", "#8F908A", "#49483E" },
+                ("Cyberpunk", false)  => new[] { "#7C3AED", "#FFFFFF", "#0891B2", "#FFFFFF", "#F7F5FF", "#FFFFFF", "#F2F8FA", "#E9E5F7", "#DDD6F0", "#181028", "#51456B", "#75678F", "#CFC5DF" },
+                ("Cyberpunk", true)   => new[] { "#00F5D4", "#071013", "#FF2A6D", "#FFFFFF", "#05080D", "#071013", "#0B151B", "#101D24", "#172832", "#EAFDFC", "#A6C7C8", "#668A8F", "#24404A" },
                 ("Emerald", true) => new[] { "#34D399", "#062B22", "#059669", "#FFFFFF", "#101815", "#151E1A", "#1B2722", "#22312A", "#293B32", "#ECFDF5", "#C7E8DA", "#90AFA2", "#3D554B" },
                 _                  => new[] { "#059669", "#FFFFFF", "#047857", "#FFFFFF", "#F3FAF7", "#FFFFFF", "#F7FCFA", "#EAF6F1", "#DDF0E8", "#14231D", "#405B50", "#687E75", "#C5D8D0" }
             };
