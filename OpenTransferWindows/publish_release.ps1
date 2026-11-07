@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 Set-Location $projectDir
 
-$version = "1.2.4"
+$version = "1.2.5"
 $tag = "v$version"
 $repoUrl = "https://github.com/amorsoftlab/OpenTransfer.git"
 
@@ -74,12 +74,18 @@ if ($status) {
 }
 git branch -M main
 Write-Host "Pushing main branch to $repoUrl..." -ForegroundColor Gray
-git push -u origin main -f
+git push -u origin main
+if ($LASTEXITCODE -ne 0) { throw "Git push failed. Resolve the remote changes and retry; the script will not force-push." }
 
 # Push Git Release Tag
 Write-Host "Pushing git release tag $tag to origin..." -ForegroundColor Gray
-git tag -f $tag
-git push origin $tag -f
+if (git tag --list $tag) {
+    Write-Host "Tag $tag already exists; keeping the existing tag." -ForegroundColor Yellow
+} else {
+    git tag -a $tag -m "OpenTransfer $tag"
+    git push origin $tag
+    if ($LASTEXITCODE -ne 0) { throw "Tag push failed." }
+}
 
 # 5. Create GitHub Release & Upload Asset
 Write-Host "`n[5/5] Creating GitHub Release ($tag)..." -ForegroundColor Yellow

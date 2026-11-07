@@ -7,7 +7,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using Forms = System.Windows.Forms;
+using Button = System.Windows.Controls.Button;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using DragEventArgs = System.Windows.DragEventArgs;
 using openTransferWPF.Dialogs;
 using openTransferWPF.Models;
 using openTransferWPF.Services;
@@ -29,10 +35,21 @@ namespace openTransferWPF
         private CancellationTokenSource? _copyCts;
         private GridView? _defaultGridView;
         private bool _isGridView = false;
+        private int _directoryLoadVersion;
+        private bool _isDeviceCheckRunning;
+        private Forms.NotifyIcon? _trayIcon;
+        private bool _allowClose;
+        private bool _deviceWasDisconnected;
+        private bool _transferActive;
+        private bool _updatingStorageRoots;
+        private readonly SemaphoreSlim _transferGate = new(1, 1);
+        private int _queuedTransferCount;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            TxtAboutVersion.Text = $"Version: {UpdateService.CurrentAppVersion}";
 
             _adbService = new AdbService();
             _copyEngine = new CopyEngine(_adbService);
@@ -44,7 +61,7 @@ namespace openTransferWPF
             {
                 Interval = TimeSpan.FromSeconds(SettingsService.Instance.Settings.RefreshIntervalSeconds)
             };
-            _deviceTimer.Tick += async (s, e) => await CheckDevicesAsync();
+            _deviceTimer.Tick += async (s, e) => await CheckDevicesAsync(refreshStorage: true);
             _deviceTimer.Start();
 
             // Initial check & Settings listener
@@ -56,6 +73,9 @@ namespace openTransferWPF
             };
 
             SettingsService.Instance.SettingsChanged += (s, settings) => ApplySettings(settings);
+            StateChanged += MainWindow_StateChanged;
+            Closing += MainWindow_Closing;
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
 
         private void Log(string message)
@@ -91,8 +111,12 @@ namespace openTransferWPF
             }
         }
 
-        private async Task CheckDevicesAsync()
+        private async Task CheckDevicesAsync(bool refreshStorage = false)
         {
+            if (_isDeviceCheckRunning) return;
+            _isDeviceCheckRunning = true;
+            try
+            {
             bool available = await _adbService.IsAdbAvailableAsync();
             if (!available)
             {
@@ -100,6 +124,7 @@ namespace openTransferWPF
                 CmbDevices.ItemsSource = null;
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
+                TxtFreeStorage.Text = "Free --";
                 return;
             }
 
@@ -110,10 +135,15 @@ namespace openTransferWPF
                 CmbDevices.ItemsSource = null;
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
+                TxtFreeStorage.Text = "Free --";
                 if (!string.IsNullOrEmpty(_activeSerial))
                 {
                     Log("🔴 Device Disconnected.");
+                    if (_transferActive)
+                        MessageBox.Show("The Android device disconnected during an active transfer. The current item may be incomplete; reconnect and retry failed files.", "Transfer Interrupted", MessageBoxButton.OK, MessageBoxImage.Warning);
                     _activeSerial = string.Empty;
+                    _deviceWasDisconnected = true;
+                    Interlocked.Increment(ref _directoryLoadVersion);
                 }
             }
             else
@@ -127,12 +157,23 @@ namespace openTransferWPF
                 // Auto Select First ADB Device
                 if (string.IsNullOrEmpty(_activeSerial) || !devices.Any(d => d.Serial == _activeSerial))
                 {
-                    CmbDevices.SelectedIndex = 0;
+                    if (!_deviceWasDisconnected || SettingsService.Instance.Settings.AutoReconnect)
+                    {
+                        CmbDevices.SelectedIndex = 0;
+                        _deviceWasDisconnected = false;
+                    }
+                }
+                else
+                {
+                    CmbDevices.SelectedValue = _activeSerial;
+                    if (refreshStorage) await UpdateStorageInfoAsync();
                 }
             }
+            }
+            finally { _isDeviceCheckRunning = false; }
         }
 
-        private void CmbDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void CmbDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CmbDevices.SelectedItem is DeviceItem dev)
             {
@@ -142,7 +183,9 @@ namespace openTransferWPF
                     Title = $"Android File Transfer - {dev.Model}";
                     Log($"Connected to {dev.Model}");
                     _ = UpdateStorageInfoAsync();
-                    _ = LoadDirectoryAsync("/sdcard");
+                    _ = PopulateStorageRootsAsync();
+                    RefreshQuickAccess();
+                    _ = LoadDirectoryAsync(await GetStartupStoragePathAsync());
                 }
             }
         }
@@ -158,14 +201,39 @@ namespace openTransferWPF
         {
             if (string.IsNullOrEmpty(_activeSerial)) return;
 
+            int loadVersion = Interlocked.Increment(ref _directoryLoadVersion);
+            string serial = _activeSerial;
+
             TxtStatusFooter.Text = $"Loading {remotePath}...";
             Log($"{remotePath} folder indexed");
-            var items = await _adbService.ListDirectoryAsync(_activeSerial, remotePath);
+            var itemsTask = _adbService.ListDirectoryAsync(serial, remotePath);
+            var storageTask = _adbService.GetFreeStorageAsync(serial);
+            var items = await itemsTask;
+
+            var settings = SettingsService.Instance.Settings;
+            if (settings.ShowFolderSizes)
+            {
+                using var sizeGate = new SemaphoreSlim(4);
+                await Task.WhenAll(items.Where(i => i.IsDir).Select(async item =>
+                {
+                    await sizeGate.WaitAsync();
+                    try { item.SizeBytes = await _adbService.GetDirectorySizeAsync(serial, item.Path); }
+                    finally { sizeGate.Release(); }
+                }));
+            }
+
+            if (loadVersion != _directoryLoadVersion || serial != _activeSerial) return;
 
             foreach (var item in items)
             {
                 item.ResolveCategoryIcon();
+                item.FolderBrush = GetFolderBrush(settings.FolderColor);
+                item.DisplayName = settings.ShowFileExtensions || item.IsDir
+                    ? item.Name
+                    : System.IO.Path.GetFileNameWithoutExtension(item.Name);
             }
+
+            TxtFreeStorage.Text = await storageTask;
 
             _currentPath = remotePath;
             TxtPath.Text = remotePath;
@@ -186,12 +254,57 @@ namespace openTransferWPF
 
         private void FilterAndRender()
         {
-            string q = TxtSearch.Text.Trim().ToLower();
-            var filtered = _allItems.Where(i => string.IsNullOrEmpty(q) || i.Name.ToLower().Contains(q)).ToList();
+            string q = TxtSearch.Text.Trim();
+            bool showHidden = SettingsService.Instance.Settings.ShowHiddenFiles;
+            string? extension = null;
+            long? minSize = null, maxSize = null;
+            DateTime? afterDate = null;
+            var textTerms = new List<string>();
+            foreach (string token in q.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (token.StartsWith("ext:", StringComparison.OrdinalIgnoreCase)) extension = token[4..].TrimStart('.');
+                else if (token.StartsWith("min:", StringComparison.OrdinalIgnoreCase)) minSize = ParseSize(token[4..]);
+                else if (token.StartsWith("max:", StringComparison.OrdinalIgnoreCase)) maxSize = ParseSize(token[4..]);
+                else if (token.StartsWith("after:", StringComparison.OrdinalIgnoreCase) && DateTime.TryParse(token[6..], out var date)) afterDate = date;
+                else textTerms.Add(token);
+            }
+            IEnumerable<AndroidFileItem> query = _allItems.Where(i => showHidden || !i.Name.StartsWith('.'));
+            if (extension != null) query = query.Where(i => i.Name.EndsWith("." + extension, StringComparison.OrdinalIgnoreCase));
+            if (minSize.HasValue) query = query.Where(i => !i.IsDir && i.SizeBytes >= minSize.Value);
+            if (maxSize.HasValue) query = query.Where(i => !i.IsDir && i.SizeBytes <= maxSize.Value);
+            if (afterDate.HasValue) query = query.Where(i => DateTime.TryParse(i.ModifiedDateStr, out var d) && d >= afterDate.Value);
+            foreach (string term in textTerms) query = query.Where(i => i.Name.Contains(term, StringComparison.OrdinalIgnoreCase));
+            var settings = SettingsService.Instance.Settings;
+            IOrderedEnumerable<AndroidFileItem> ordered = query.OrderByDescending(i => i.IsDir);
+            List<AndroidFileItem> filtered = settings.SortBy switch
+            {
+                "Size" => (settings.SortDescending ? ordered.ThenByDescending(i => i.SizeBytes) : ordered.ThenBy(i => i.SizeBytes)).ToList(),
+                "Date" => (settings.SortDescending ? ordered.ThenByDescending(i => i.ModifiedUnixSeconds) : ordered.ThenBy(i => i.ModifiedUnixSeconds)).ToList(),
+                _ => (settings.SortDescending ? ordered.ThenByDescending(i => i.Name, StringComparer.OrdinalIgnoreCase) : ordered.ThenBy(i => i.Name, StringComparer.OrdinalIgnoreCase)).ToList()
+            };
 
             LstFiles.ItemsSource = filtered;
             TxtStatusFooter.Text = $"{filtered.Count} Items";
             UpdateSelectionStats();
+        }
+
+        private static long? ParseSize(string value)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(value, @"^([0-9]+(?:\.[0-9]+)?)(KB|MB|GB|B)?$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!match.Success || !double.TryParse(match.Groups[1].Value, out double number)) return null;
+            double factor = match.Groups[2].Value.ToUpperInvariant() switch { "KB" => 1024, "MB" => 1024 * 1024, "GB" => 1024d * 1024 * 1024, _ => 1 };
+            return (long)(number * factor);
+        }
+
+        private void Sort_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not MenuItem item) return;
+            var settings = SettingsService.Instance.Settings;
+            string tag = item.Tag?.ToString() ?? "Name";
+            if (tag == "Toggle") settings.SortDescending = !settings.SortDescending;
+            else settings.SortBy = tag;
+            SettingsService.Instance.SaveSettings(settings);
+            FilterAndRender();
         }
 
         private void LstFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -254,6 +367,58 @@ namespace openTransferWPF
             _ = LoadDirectoryAsync("/sdcard");
         }
 
+        private async Task PopulateStorageRootsAsync()
+        {
+            if (string.IsNullOrEmpty(_activeSerial)) return;
+            _updatingStorageRoots = true;
+            try
+            {
+                var roots = await _adbService.GetStorageRootsAsync(_activeSerial);
+                CmbStorageRoots.ItemsSource = roots;
+                CmbStorageRoots.SelectedItem = roots.FirstOrDefault(r => _currentPath.StartsWith(r, StringComparison.OrdinalIgnoreCase)) ?? roots.FirstOrDefault();
+            }
+            finally { _updatingStorageRoots = false; }
+        }
+
+        private void CmbStorageRoots_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_updatingStorageRoots && CmbStorageRoots.SelectedItem is string path) _ = LoadDirectoryAsync(path);
+        }
+
+        private async void RefreshQuickAccess()
+        {
+            if (string.IsNullOrEmpty(_activeSerial)) return;
+            var candidates = new List<string>
+            {
+                "/sdcard/DCIM/Camera", "/sdcard/Pictures/Screenshots", "/sdcard/Download",
+                "/sdcard/Android/media/com.whatsapp/WhatsApp/Media",
+                "/sdcard/Android/media/org.telegram.messenger/Telegram"
+            };
+            var checks = await Task.WhenAll(candidates.Select(async path => (path, exists: await _adbService.PathExistsAsync(_activeSerial, path))));
+            var paths = checks.Where(x => x.exists).Select(x => x.path).ToList();
+            paths.AddRange(SettingsService.Instance.Settings.FavoritePaths);
+            CmbQuickAccess.ItemsSource = paths.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            CmbQuickAccess.SelectedIndex = -1;
+            CmbQuickAccess.Text = "Quick Access";
+        }
+
+        private async void CmbQuickAccess_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbQuickAccess.SelectedItem is not string path || string.IsNullOrEmpty(_activeSerial)) return;
+            if (await _adbService.PathExistsAsync(_activeSerial, path)) await LoadDirectoryAsync(path);
+            else MessageBox.Show($"This folder does not exist on the connected device:\n{path}", "Quick Access", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnToggleFavorite_Click(object sender, RoutedEventArgs e)
+        {
+            var settings = SettingsService.Instance.Settings;
+            var existing = settings.FavoritePaths.FirstOrDefault(p => p.Equals(_currentPath, StringComparison.OrdinalIgnoreCase));
+            if (existing != null) { settings.FavoritePaths.Remove(existing); Log($"Unpinned {_currentPath}"); }
+            else { settings.FavoritePaths.Add(_currentPath); Log($"Pinned {_currentPath}"); }
+            SettingsService.Instance.SaveSettings(settings);
+            RefreshQuickAccess();
+        }
+
         private void TxtPath_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -270,10 +435,10 @@ namespace openTransferWPF
         private async void BtnRefreshDevice_Click(object sender, RoutedEventArgs e)
         {
             Log("Refreshing device storage...");
-            await CheckDevicesAsync();
+            await CheckDevicesAsync(refreshStorage: true);
             if (!string.IsNullOrEmpty(_activeSerial))
             {
-                _ = LoadDirectoryAsync(_currentPath);
+                await LoadDirectoryAsync(_currentPath);
             }
         }
 
@@ -396,6 +561,59 @@ namespace openTransferWPF
             }
         }
 
+        private async void BtnPreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstFiles.SelectedItem is not AndroidFileItem item || item.IsDir || string.IsNullOrEmpty(_activeSerial))
+            {
+                MessageBox.Show("Select a file to preview.", "Preview", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            try
+            {
+                if (item.SizeBytes > 100L * 1024 * 1024 && MessageBox.Show($"Preview requires downloading {item.FormattedSize}. Continue?", "Large Preview", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+                string previewDir = Path.Combine(Path.GetTempPath(), "OpenTransfer", "Preview");
+                Directory.CreateDirectory(previewDir);
+                string localPath = Path.Combine(previewDir, item.Name);
+                TxtStatusFooter.Text = $"Preparing preview: {item.Name}";
+                bool ok = await _adbService.PullFileWithProgressAsync(_activeSerial, item.Path, localPath, item.SizeBytes, new Progress<long>(), CancellationToken.None);
+                if (!ok) throw new IOException("ADB could not download the preview file.");
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(localPath) { UseShellExecute = true });
+                TxtStatusFooter.Text = "Preview opened";
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Preview Failed", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void BtnHistory_Click(object sender, RoutedEventArgs e) => new TransferHistoryDialog { Owner = this }.ShowDialog();
+
+        private void BtnExportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog { Filter = "OpenTransfer settings (*.json)|*.json", FileName = "OpenTransfer-settings.json" };
+            if (dialog.ShowDialog() == true) SettingsService.Instance.Export(dialog.FileName);
+        }
+
+        private void BtnImportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog { Filter = "OpenTransfer settings (*.json)|*.json" };
+            if (dialog.ShowDialog() == true)
+            {
+                if (SettingsService.Instance.Import(dialog.FileName)) { LoadSettingsIntoUI(); MessageBox.Show("Settings imported."); }
+                else MessageBox.Show("The selected settings file is invalid.", "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnResetSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Reset all settings to defaults?", "Reset Settings", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            { SettingsService.Instance.Reset(); LoadSettingsIntoUI(); RefreshQuickAccess(); }
+        }
+
+        private void BtnClearLogFiles_Click(object sender, RoutedEventArgs e)
+        {
+            string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openTransferWPF", "Logs");
+            try { if (Directory.Exists(logDir)) foreach (string file in Directory.EnumerateFiles(logDir, "*.log")) File.Delete(file); MessageBox.Show("Log files cleared."); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Clear Logs Failed", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
         private async void BtnCopyToPC_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_activeSerial))
@@ -430,13 +648,13 @@ namespace openTransferWPF
                     }
                 }
 
-                string strategy = "SkipExisting";
-                if (hasConflict)
-                {
-                    var conflictDlg = new ConflictDialog { Owner = this };
-                    if (conflictDlg.ShowDialog() != true) return;
-                    strategy = conflictDlg.SelectedStrategy;
-                }
+                string? strategy = ResolveConflictStrategy(hasConflict);
+                if (strategy == null) return;
+
+                int queuePosition = Interlocked.Increment(ref _queuedTransferCount);
+                if (queuePosition > 1) TxtStatusFooter.Text = $"Download queued (position {queuePosition})";
+                await _transferGate.WaitAsync();
+                Interlocked.Decrement(ref _queuedTransferCount);
 
                 // Show Interactive Progress Dialog
                 _copyCts = new CancellationTokenSource();
@@ -457,6 +675,7 @@ namespace openTransferWPF
                 var logProg = new Progress<string>(msg => Log(msg));
 
                 progressDlg.Show();
+                _transferActive = true;
 
                 try
                 {
@@ -482,6 +701,14 @@ namespace openTransferWPF
                 }
                 finally
                 {
+                    _transferActive = false;
+                    TransferHistoryService.Instance.Add(new TransferHistoryEntry
+                    {
+                        Direction = "Download", Device = _activeSerial, Source = _currentPath, Destination = destFolder,
+                        TotalFiles = lastTotal, CompletedFiles = lastCopied,
+                        Result = transferFinished ? (lastCopied == lastTotal ? "Completed" : "Completed with issues") : "Cancelled / Failed"
+                    });
+                    ShowTransferNotification("Download finished", $"{lastCopied} of {lastTotal} files completed.");
                     if (transferFinished && !_copyCts.IsCancellationRequested)
                     {
                         progressDlg.ShowCompleteState(lastCopied, lastTotal, destFolder, isDownload: true);
@@ -490,6 +717,7 @@ namespace openTransferWPF
                     {
                         progressDlg.Close();
                     }
+                    _transferGate.Release();
                 }
             }
         }
@@ -567,13 +795,13 @@ namespace openTransferWPF
                 }
             }
 
-            string strategy = "SkipExisting";
-            if (hasConflict)
-            {
-                var conflictDlg = new ConflictDialog { Owner = this };
-                if (conflictDlg.ShowDialog() != true) return;
-                strategy = conflictDlg.SelectedStrategy;
-            }
+            string? strategy = ResolveConflictStrategy(hasConflict);
+            if (strategy == null) return;
+
+            int queuePosition = Interlocked.Increment(ref _queuedTransferCount);
+            if (queuePosition > 1) TxtStatusFooter.Text = $"Upload queued (position {queuePosition})";
+            await _transferGate.WaitAsync();
+            Interlocked.Decrement(ref _queuedTransferCount);
 
             // Show Interactive Progress Dialog
             _copyCts = new CancellationTokenSource();
@@ -594,6 +822,7 @@ namespace openTransferWPF
             var logProg = new Progress<string>(msg => Log(msg));
 
             progressDlg.Show();
+            _transferActive = true;
 
             try
             {
@@ -619,6 +848,14 @@ namespace openTransferWPF
             }
             finally
             {
+                _transferActive = false;
+                TransferHistoryService.Instance.Add(new TransferHistoryEntry
+                {
+                    Direction = "Upload", Device = _activeSerial, Source = string.Join("; ", sourcePaths.Select(Path.GetFileName)), Destination = _currentPath,
+                    TotalFiles = lastTotal, CompletedFiles = lastCopied,
+                    Result = transferFinished ? (lastCopied == lastTotal ? "Completed" : "Completed with issues") : "Cancelled / Failed"
+                });
+                ShowTransferNotification("Upload finished", $"{lastCopied} of {lastTotal} files completed.");
                 if (transferFinished && !_copyCts.IsCancellationRequested)
                 {
                     progressDlg.ShowCompleteState(lastCopied, lastTotal, _currentPath, isDownload: false);
@@ -628,6 +865,7 @@ namespace openTransferWPF
                     progressDlg.Close();
                 }
                 _ = LoadDirectoryAsync(_currentPath);
+                _transferGate.Release();
             }
         }
 
@@ -810,7 +1048,7 @@ namespace openTransferWPF
         {
             if (_settingsTabButtons == null || _settingsPanels == null) return;
 
-            var greenBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#10B981"));
+            var greenBrush = (System.Windows.Media.Brush)FindResource("FluxPrimaryContainer");
             var onPrimaryBrush = System.Windows.Media.Brushes.White;
             var onSurfaceBrush = (System.Windows.Media.Brush)FindResource("FluxOnSurface");
 
@@ -842,13 +1080,15 @@ namespace openTransferWPF
             ChkAutoReconnect.IsChecked = s.AutoReconnect;
 
             // Appearance
-            CmbTheme.SelectedIndex = s.Theme switch
+            CmbThemePalette.SelectedIndex = s.ThemePalette switch
             {
-                "Light" => 1,
-                "Dark" => 2,
+                "VSCode" => 1,
+                "Nord" => 2,
+                "Dracula" => 3,
                 _ => 0
             };
-            CmbLanguage.SelectedIndex = s.Language == "Malayalam" ? 1 : 0;
+            string themeMode = s.ThemeMode == "System" && s.Theme is "Light" or "Dark" ? s.Theme : s.ThemeMode;
+            CmbThemeMode.SelectedIndex = themeMode switch { "Light" => 1, "Dark" => 2, _ => 0 };
             CmbFolderColor.SelectedIndex = s.FolderColor switch
             {
                 "Blue" => 1,
@@ -872,21 +1112,6 @@ namespace openTransferWPF
                 "FilenameOnly" => 0,
                 "FilenameSizeDate" => 2,
                 _ => 1
-            };
-            CmbTransferMode.SelectedIndex = s.TransferMode switch
-            {
-                "MaxSpeed" => 0,
-                "MaxCompatibility" => 2,
-                _ => 1
-            };
-            CmbBufferSize.SelectedIndex = s.BufferSize switch
-            {
-                "512 KB" => 1,
-                "1 MB" => 2,
-                "2 MB" => 3,
-                "4 MB" => 4,
-                "8 MB" => 5,
-                _ => 0
             };
             ChkVerifyCopied.IsChecked = s.VerifyCopiedFiles;
             ChkRetryFailed.IsChecked = s.RetryFailedTransfers;
@@ -933,6 +1158,7 @@ namespace openTransferWPF
                 _ => 0
             };
             ChkDebugLogging.IsChecked = s.EnableDebugLogging;
+            CmbLogRetention.SelectedIndex = s.LogRetentionDays switch { 7 => 0, 30 => 2, 90 => 3, _ => 1 };
         }
 
         private void BtnBrowseAdb_Click(object sender, RoutedEventArgs e)
@@ -970,13 +1196,10 @@ namespace openTransferWPF
                 AutoReconnect = ChkAutoReconnect.IsChecked == true,
 
                 // Appearance
-                Theme = CmbTheme.SelectedIndex switch
-                {
-                    1 => "Light",
-                    2 => "Dark",
-                    _ => "System"
-                },
-                Language = CmbLanguage.SelectedIndex == 1 ? "Malayalam" : "English",
+                Theme = "System",
+                ThemePalette = SelectedThemePalette(),
+                ThemeMode = SelectedThemeMode(),
+                Language = "English",
                 FolderColor = CmbFolderColor.SelectedIndex switch
                 {
                     1 => "Blue",
@@ -1001,21 +1224,8 @@ namespace openTransferWPF
                     2 => "FilenameSizeDate",
                     _ => "FilenameSize"
                 },
-                TransferMode = CmbTransferMode.SelectedIndex switch
-                {
-                    0 => "MaxSpeed",
-                    2 => "MaxCompatibility",
-                    _ => "Balanced"
-                },
-                BufferSize = CmbBufferSize.SelectedIndex switch
-                {
-                    1 => "512 KB",
-                    2 => "1 MB",
-                    3 => "2 MB",
-                    4 => "4 MB",
-                    5 => "8 MB",
-                    _ => "Auto"
-                },
+                TransferMode = "Balanced",
+                BufferSize = "Auto",
                 VerifyCopiedFiles = ChkVerifyCopied.IsChecked == true,
                 RetryFailedTransfers = ChkRetryFailed.IsChecked == true,
                 RetryCount = CmbRetryCount.SelectedIndex switch
@@ -1061,6 +1271,10 @@ namespace openTransferWPF
                     _ => 30
                 },
                 EnableDebugLogging = ChkDebugLogging.IsChecked == true
+                ,LogRetentionDays = CmbLogRetention.SelectedIndex switch { 0 => 7, 2 => 30, 3 => 90, _ => 14 }
+                ,FavoritePaths = SettingsService.Instance.Settings.FavoritePaths.ToList()
+                ,SortBy = SettingsService.Instance.Settings.SortBy
+                ,SortDescending = SettingsService.Instance.Settings.SortDescending
             };
 
             SettingsService.Instance.SaveSettings(s);
@@ -1074,7 +1288,14 @@ namespace openTransferWPF
             if (_deviceTimer != null)
             {
                 _deviceTimer.Interval = TimeSpan.FromSeconds(Math.Max(1, s.RefreshIntervalSeconds));
+                if (s.AutoDetectDevices) _deviceTimer.Start();
+                else _deviceTimer.Stop();
             }
+
+            ApplyTheme(s.ThemePalette, s.ThemeMode == "System" && s.Theme is "Light" or "Dark" ? s.Theme : s.ThemeMode);
+            ApplyLaunchAtStartup(s.LaunchAtStartup);
+            ConfigureTrayIcon(s.MinimizeToTray);
+            CleanupOldLogs(s.LogRetentionDays);
 
             if (s.DefaultView == "LargeIcons" && !_isGridView)
             {
@@ -1084,6 +1305,227 @@ namespace openTransferWPF
             {
                 SetViewMode(isGrid: false);
             }
+
+            foreach (var item in _allItems)
+            {
+                item.FolderBrush = GetFolderBrush(s.FolderColor);
+                item.DisplayName = s.ShowFileExtensions || item.IsDir
+                    ? item.Name
+                    : System.IO.Path.GetFileNameWithoutExtension(item.Name);
+            }
+            FilterAndRender();
+
+            if (!string.IsNullOrEmpty(_activeSerial))
+                _ = LoadDirectoryAsync(_currentPath);
+        }
+
+        private static string GetFolderBrush(string color) => color switch
+        {
+            "Blue" => "#3B82F6",
+            "Green" => "#10B981",
+            "Purple" => "#8B5CF6",
+            "Red" => "#EF4444",
+            "Orange" => "#F97316",
+            _ => "#F59E0B"
+        };
+
+        private async Task<string> GetStartupStoragePathAsync()
+        {
+            string configured = SettingsService.Instance.Settings.DefaultAndroidStorage;
+            if (configured != "SD Card" || string.IsNullOrEmpty(_activeSerial)) return "/sdcard";
+            string? removable = await _adbService.FindRemovableStorageAsync(_activeSerial);
+            if (removable == null) Log("No removable SD card detected; using internal storage.");
+            return removable ?? "/sdcard";
+        }
+
+        private void ConfigureTrayIcon(bool enabled)
+        {
+            if (!enabled)
+            {
+                _trayIcon?.Dispose();
+                _trayIcon = null;
+                return;
+            }
+            if (_trayIcon != null) return;
+
+            var menu = new Forms.ContextMenuStrip();
+            menu.Items.Add("Open OpenTransfer", null, (_, _) => RestoreFromTray());
+            menu.Items.Add("Exit", null, (_, _) => { _allowClose = true; Close(); });
+            _trayIcon = new Forms.NotifyIcon
+            {
+                Text = "OpenTransfer",
+                Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath ?? string.Empty),
+                ContextMenuStrip = menu,
+                Visible = true
+            };
+            _trayIcon.DoubleClick += (_, _) => RestoreFromTray();
+        }
+
+        private void ShowTransferNotification(string title, string message)
+        {
+            _trayIcon?.ShowBalloonTip(2500, title, message, Forms.ToolTipIcon.Info);
+        }
+
+        private void MainWindow_StateChanged(object? sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized && SettingsService.Instance.Settings.MinimizeToTray)
+            {
+                Hide();
+                _trayIcon?.ShowBalloonTip(1500, "OpenTransfer", "OpenTransfer is still running in the tray.", Forms.ToolTipIcon.Info);
+            }
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!_allowClose && SettingsService.Instance.Settings.MinimizeToTray)
+            {
+                e.Cancel = true;
+                WindowState = WindowState.Minimized;
+                Hide();
+                return;
+            }
+            _trayIcon?.Dispose();
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+        }
+
+        private void RestoreFromTray()
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        }
+
+        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            var settings = SettingsService.Instance.Settings;
+            if (settings.ThemeMode == "System")
+                Dispatcher.Invoke(() => ApplyTheme(settings.ThemePalette, "System"));
+        }
+
+        private void AppearanceTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded || CmbThemePalette == null || CmbThemeMode == null) return;
+            ApplyTheme(SelectedThemePalette(), SelectedThemeMode());
+        }
+
+        private string SelectedThemePalette() => CmbThemePalette.SelectedIndex switch
+        {
+            1 => "VSCode",
+            2 => "Nord",
+            3 => "Dracula",
+            _ => "Emerald"
+        };
+
+        private string SelectedThemeMode() => CmbThemeMode.SelectedIndex switch
+        {
+            1 => "Light",
+            2 => "Dark",
+            _ => "System"
+        };
+
+        private string? ResolveConflictStrategy(bool hasConflict)
+        {
+            if (!hasConflict) return "SkipExisting";
+            return SettingsService.Instance.Settings.ConflictResolution switch
+            {
+                "Skip" => "SkipExisting",
+                "Replace" => "OverwriteAll",
+                "Rename" => "Rename",
+                _ => ShowConflictDialog()
+            };
+        }
+
+        private string? ShowConflictDialog()
+        {
+            var conflictDlg = new ConflictDialog { Owner = this };
+            return conflictDlg.ShowDialog() == true ? conflictDlg.SelectedStrategy : null;
+        }
+
+        private void ApplyLaunchAtStartup(bool enabled)
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", writable: true);
+                if (key == null) return;
+                if (enabled)
+                {
+                    string exePath = Environment.ProcessPath ?? string.Empty;
+                    if (!string.IsNullOrEmpty(exePath)) key.SetValue("OpenTransfer", $"\"{exePath}\"");
+                }
+                else key.DeleteValue("OpenTransfer", throwOnMissingValue: false);
+            }
+            catch (Exception ex) { Log($"Startup setting could not be applied: {ex.Message}"); }
+        }
+
+        private void ApplyTheme(string palette, string mode)
+        {
+            bool dark = mode == "Dark" || (mode == "System" && IsWindowsDarkMode());
+            var colors = (palette, dark) switch
+            {
+                ("VSCode", false) => new[] { "#007ACC", "#FFFFFF", "#0067B8", "#FFFFFF", "#F3F3F3", "#FFFFFF", "#F8F8F8", "#F0F0F0", "#E8E8E8", "#1E1E1E", "#4B4B4B", "#6B6B6B", "#D0D0D0" },
+                ("VSCode", true)  => new[] { "#3794FF", "#FFFFFF", "#007ACC", "#FFFFFF", "#181818", "#1E1E1E", "#252526", "#2D2D30", "#333337", "#F1F1F1", "#CCCCCC", "#9D9D9D", "#454545" },
+                ("Nord", false)   => new[] { "#5E81AC", "#FFFFFF", "#4C6F96", "#FFFFFF", "#ECEFF4", "#FFFFFF", "#F7F9FC", "#E5E9F0", "#D8DEE9", "#2E3440", "#4C566A", "#66728A", "#C4CAD4" },
+                ("Nord", true)    => new[] { "#88C0D0", "#2E3440", "#5E81AC", "#FFFFFF", "#242933", "#2E3440", "#343B49", "#3B4252", "#434C5E", "#ECEFF4", "#D8DEE9", "#AAB3C5", "#4C566A" },
+                ("Dracula", false)=> new[] { "#7C3AED", "#FFFFFF", "#6D28D9", "#FFFFFF", "#F8F7FC", "#FFFFFF", "#F1EFF8", "#EAE6F4", "#DDD7EC", "#282A36", "#56586A", "#727386", "#CEC9DB" },
+                ("Dracula", true) => new[] { "#BD93F9", "#282A36", "#8B5CF6", "#FFFFFF", "#1E1F29", "#282A36", "#30313D", "#383A4A", "#44475A", "#F8F8F2", "#D7D7D2", "#A8A8A2", "#55586D" },
+                ("Emerald", true) => new[] { "#34D399", "#062B22", "#059669", "#FFFFFF", "#101815", "#151E1A", "#1B2722", "#22312A", "#293B32", "#ECFDF5", "#C7E8DA", "#90AFA2", "#3D554B" },
+                _                  => new[] { "#059669", "#FFFFFF", "#047857", "#FFFFFF", "#F3FAF7", "#FFFFFF", "#F7FCFA", "#EAF6F1", "#DDF0E8", "#14231D", "#405B50", "#687E75", "#C5D8D0" }
+            };
+
+            SetBrush("FluxPrimary", colors[0]);
+            SetBrush("FluxOnPrimary", colors[1]);
+            SetBrush("FluxPrimaryContainer", colors[2]);
+            SetBrush("FluxOnPrimaryContainer", colors[3]);
+            SetBrush("FluxSurface", colors[4]);
+            SetBrush("FluxBackground", colors[4]);
+            SetBrush("FluxSurfaceContainerLowest", colors[5]);
+            SetBrush("FluxSurfaceContainerLow", colors[6]);
+            SetBrush("FluxSurfaceContainer", colors[7]);
+            SetBrush("FluxSurfaceContainerHigh", colors[8]);
+            SetBrush("FluxSurfaceContainerHighest", colors[8]);
+            SetBrush("FluxSurfaceVariant", colors[8]);
+            SetBrush("FluxOnSurface", colors[9]);
+            SetBrush("FluxOnBackground", colors[9]);
+            SetBrush("FluxOnSurfaceVariant", colors[10]);
+            SetBrush("FluxOutline", colors[11]);
+            SetBrush("FluxOutlineVariant", colors[12]);
+            SetBrush("FluxSurfaceTint", colors[0]);
+            SetBrush("FluxSelectedRowTint", dark ? "#3034D399" : "#20059669");
+            SetBrush("FluxHoverTint", dark ? "#12FFFFFF" : "#08000000");
+
+            if (_settingsTabButtons != null)
+            {
+                int selected = Array.FindIndex(_settingsPanels!, panel => panel.Visibility == Visibility.Visible);
+                SelectSettingsTab(Math.Max(0, selected));
+            }
+        }
+
+        private static bool IsWindowsDarkMode()
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                return key?.GetValue("AppsUseLightTheme") is int value && value == 0;
+            }
+            catch { return false; }
+        }
+
+        private void SetBrush(string key, string hex)
+        {
+            if (FindResource(key) is SolidColorBrush brush)
+                brush.Color = (Color)ColorConverter.ConvertFromString(hex);
+        }
+
+        private static void CleanupOldLogs(int retentionDays)
+        {
+            try
+            {
+                string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openTransferWPF", "Logs");
+                if (!Directory.Exists(dir)) return;
+                DateTime cutoff = DateTime.Now.AddDays(-Math.Max(1, retentionDays));
+                foreach (string file in Directory.EnumerateFiles(dir, "*.log")) if (File.GetLastWriteTime(file) < cutoff) File.Delete(file);
+            }
+            catch { }
         }
 
         // --- AUTO-UPDATE & GITHUB RELEASE CHECKER ---

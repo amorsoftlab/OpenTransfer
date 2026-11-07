@@ -47,6 +47,7 @@ namespace openTransferWPF.Services
         private bool _isPaused;
 
         public bool IsPaused => _isPaused;
+        public List<string> LastFailedItems { get; } = new();
 
         public CopyEngine(AdbService adbService)
         {
@@ -75,6 +76,7 @@ namespace openTransferWPF.Services
             IProgress<string> logger,
             CancellationToken ct)
         {
+            LastFailedItems.Clear();
             logger.Report($"🔍 Scanning remote folder tree on Android [{remoteSourceDir}]...");
             var remoteFiles = await _adbService.ScanRemoteTreeAsync(serial, remoteSourceDir);
             logger.Report($"✓ Found {remoteFiles.Count} total files across all subfolders.");
@@ -149,6 +151,7 @@ namespace openTransferWPF.Services
                 }
 
                 var rfile = remoteFiles[i];
+                var settings = SettingsService.Instance.Settings;
 
                 string relPath = rfile.Path;
                 if (relPath.StartsWith(cleanRemoteBase, StringComparison.OrdinalIgnoreCase))
@@ -158,8 +161,6 @@ namespace openTransferWPF.Services
 
                 // Check Auto-Split Settings
                 string localTargetPath;
-                var settings = SettingsService.Instance.Settings;
-                
                 string relDirForSplit = Path.GetDirectoryName(relPath.Replace('/', Path.DirectorySeparatorChar)) ?? "";
                 bool shouldSplit = settings.AutoSplitOnTransfer && 
                                    settings.AutoSplitBatchSize > 0 && 
@@ -211,16 +212,31 @@ namespace openTransferWPF.Services
                     localTargetPath = Path.Combine(localDestDir, relPath.Replace('/', Path.DirectorySeparatorChar));
                 }
 
+                if (!settings.PreserveFolderStructure)
+                    localTargetPath = Path.Combine(localDestDir, Path.GetFileName(relPath));
+
                 // O(1) Dictionary Skip Check
-                if (strategyMode == "SkipExisting")
+                bool localExists = File.Exists(localTargetPath);
+                if (strategyMode == "SkipExisting" && localExists)
                 {
-                    if (localIndex.TryGetValue(relPath, out long localLength) && rfile.SizeBytes > 0 && localLength == rfile.SizeBytes)
+                    var localInfo = new FileInfo(localTargetPath);
+                    bool matches = settings.CompareMethod == "FilenameOnly" || localInfo.Length == rfile.SizeBytes;
+                    if (matches && settings.CompareMethod == "FilenameSizeDate" && rfile.ModifiedUnixSeconds > 0)
+                    {
+                        long localUnix = new DateTimeOffset(localInfo.LastWriteTimeUtc).ToUnixTimeSeconds();
+                        matches = Math.Abs(localUnix - rfile.ModifiedUnixSeconds) <= 2;
+                    }
+                    if (matches)
                     {
                         skippedCount++;
                         logger.Report($"⏩ Skipped (Already Exists): {rfile.Name}");
                         ReportProgress(progress, "Downloading", rfile.Name, i + 1, totalCount, totalBytesTransferred, totalSizeJobBytes, stopwatch.Elapsed.TotalSeconds, skippedCount, copiedCount, 0, rfile.SizeBytes);
                         continue;
                     }
+                }
+                else if (strategyMode == "Rename" && localExists)
+                {
+                    localTargetPath = GetAvailableLocalPath(localTargetPath);
                 }
 
                 logger.Report($"📥 Downloading: {relPath} -> {localTargetPath}");
@@ -234,18 +250,30 @@ namespace openTransferWPF.Services
                 });
 
                 bool success = false;
-                for (int attempt = 1; attempt <= 3 && !success; attempt++)
+                int maxAttempts = settings.RetryFailedTransfers ? Math.Max(1, settings.RetryCount + 1) : 1;
+                for (int attempt = 1; attempt <= maxAttempts && !success; attempt++)
                 {
                     success = await _adbService.PullFileWithProgressAsync(serial, rfile.Path, localTargetPath, rfile.SizeBytes, fileBytesProgress, ct);
-                    if (!success && attempt < 3)
+                    if (!success && attempt < maxAttempts)
                     {
-                        logger.Report($"⚠️ Retry {attempt}/3 for: {rfile.Name}");
+                        logger.Report($"⚠️ Retry {attempt}/{maxAttempts - 1} for: {rfile.Name}");
                         await Task.Delay(200 * attempt, ct);
                     }
                 }
 
+                if (success && settings.VerifyCopiedFiles && rfile.SizeBytes >= 0)
+                {
+                    success = File.Exists(localTargetPath) && new FileInfo(localTargetPath).Length == rfile.SizeBytes;
+                    if (!success) logger.Report($"❌ Verification failed (size mismatch): {rfile.Name}");
+                }
+
                 if (success)
                 {
+                    if (settings.PreserveModifiedDate && rfile.ModifiedUnixSeconds > 0)
+                    {
+                        try { File.SetLastWriteTimeUtc(localTargetPath, DateTimeOffset.FromUnixTimeSeconds(rfile.ModifiedUnixSeconds).UtcDateTime); }
+                        catch (Exception ex) { logger.Report($"⚠️ Could not preserve date for {rfile.Name}: {ex.Message}"); }
+                    }
                     copiedCount++;
                     long fileBytes = rfile.SizeBytes > 0 ? rfile.SizeBytes : (File.Exists(localTargetPath) ? new FileInfo(localTargetPath).Length : 0);
                     totalBytesTransferred += fileBytes;
@@ -253,6 +281,7 @@ namespace openTransferWPF.Services
                 }
                 else
                 {
+                    LastFailedItems.Add(rfile.Path);
                     logger.Report($"❌ Failed to download: {rfile.Name}");
                 }
 
@@ -278,6 +307,7 @@ namespace openTransferWPF.Services
             IProgress<string> logger,
             CancellationToken ct)
         {
+            LastFailedItems.Clear();
             logger.Report($"🔍 Scanning local folder tree...");
             var itemsToPush = new List<CopyEngineItem>();
 
@@ -366,11 +396,10 @@ namespace openTransferWPF.Services
                 }
 
                 var item = itemsToPush[i];
+                var settings = SettingsService.Instance.Settings;
 
                 // Check Auto-Split Settings
                 string remoteTargetFile;
-                var settings = SettingsService.Instance.Settings;
-                
                 string relDirForSplit = Path.GetDirectoryName(item.RelativeRemotePath.Replace('\\', '/'))?.Replace('\\', '/') ?? "";
                 bool shouldSplit = settings.AutoSplitOnTransfer && 
                                    settings.AutoSplitBatchSize > 0 && 
@@ -425,13 +454,27 @@ namespace openTransferWPF.Services
                     remoteTargetFile = $"{cleanRemoteBase}/{item.RelativeRemotePath}";
                 }
 
+                if (!settings.PreserveFolderStructure)
+                    remoteTargetFile = $"{cleanRemoteBase}/{Path.GetFileName(item.LocalPath)}";
+
                 long fileSize = 0;
                 try { fileSize = new FileInfo(item.LocalPath).Length; } catch { }
 
+                string remoteRelativeTarget = remoteTargetFile.StartsWith(cleanRemoteBase + "/", StringComparison.OrdinalIgnoreCase)
+                    ? remoteTargetFile.Substring(cleanRemoteBase.Length + 1)
+                    : item.RelativeRemotePath;
+
                 // O(1) Remote Dictionary Skip Check
-                if (strategyMode == "SkipExisting")
+                if (strategyMode == "SkipExisting" && remoteIndex.TryGetValue(remoteRelativeTarget, out long existingSize))
                 {
-                    if (remoteIndex.TryGetValue(item.RelativeRemotePath, out long rSize) && fileSize > 0 && rSize == fileSize)
+                    bool matches = settings.CompareMethod == "FilenameOnly" || existingSize == fileSize;
+                    if (matches && settings.CompareMethod == "FilenameSizeDate")
+                    {
+                        long remoteUnix = await _adbService.GetRemoteModifiedUnixAsync(serial, remoteTargetFile);
+                        long localUnix = new DateTimeOffset(File.GetLastWriteTimeUtc(item.LocalPath)).ToUnixTimeSeconds();
+                        matches = remoteUnix > 0 && Math.Abs(remoteUnix - localUnix) <= 2;
+                    }
+                    if (matches)
                     {
                         skippedCount++;
                         logger.Report($"⏩ Skipped (Already Exists): {Path.GetFileName(item.LocalPath)}");
@@ -439,11 +482,22 @@ namespace openTransferWPF.Services
                         continue;
                     }
                 }
+                else if (strategyMode == "Rename" && remoteIndex.ContainsKey(remoteRelativeTarget))
+                {
+                    remoteTargetFile = GetAvailableRemotePath(remoteTargetFile, cleanRemoteBase, remoteIndex);
+                    remoteRelativeTarget = remoteTargetFile.Substring(cleanRemoteBase.Length + 1);
+                }
 
                 // Batch directory creation
                 string remoteDir = Path.GetDirectoryName(remoteTargetFile)?.Replace('\\', '/') ?? cleanRemoteBase;
                 if (!createdDirs.Contains(remoteDir))
                 {
+                    if (!settings.CreateMissingFolders && remoteDir != cleanRemoteBase)
+                    {
+                        skippedCount++;
+                        logger.Report($"⏩ Skipped (missing folder creation disabled): {Path.GetFileName(item.LocalPath)}");
+                        continue;
+                    }
                     await _adbService.CreateDirectoryAsync(serial, remoteDir);
                     createdDirs.Add(remoteDir);
                 }
@@ -460,24 +514,35 @@ namespace openTransferWPF.Services
                 });
 
                 bool success = false;
-                for (int attempt = 1; attempt <= 3 && !success; attempt++)
+                int maxAttempts = settings.RetryFailedTransfers ? Math.Max(1, settings.RetryCount + 1) : 1;
+                for (int attempt = 1; attempt <= maxAttempts && !success; attempt++)
                 {
                     success = await _adbService.PushFileWithProgressAsync(serial, item.LocalPath, remoteTargetFile, fileSize, fileBytesProgress, ct);
-                    if (!success && attempt < 3)
+                    if (!success && attempt < maxAttempts)
                     {
-                        logger.Report($"⚠️ Retry {attempt}/3 for: {fileName}");
+                        logger.Report($"⚠️ Retry {attempt}/{maxAttempts - 1} for: {fileName}");
                         await Task.Delay(200 * attempt, ct);
                     }
                 }
 
+                if (success && settings.VerifyCopiedFiles)
+                {
+                    long remoteSize = await _adbService.GetRemoteFileSizeAsync(serial, remoteTargetFile);
+                    success = remoteSize == fileSize;
+                    if (!success) logger.Report($"❌ Verification failed (size mismatch): {fileName}");
+                }
+
                 if (success)
                 {
+                    if (settings.PreserveModifiedDate)
+                        await _adbService.SetRemoteModifiedTimeAsync(serial, remoteTargetFile, File.GetLastWriteTime(item.LocalPath));
                     uploadedCount++;
                     totalBytesTransferred += fileSize;
                     logger.Report($"✓ Uploaded: {fileName}");
                 }
                 else
                 {
+                    LastFailedItems.Add(item.LocalPath);
                     logger.Report($"❌ Failed to upload: {fileName}");
                 }
 
@@ -491,6 +556,31 @@ namespace openTransferWPF.Services
 
             stopwatch.Stop();
             logger.Report($"🎉 Upload Complete: {uploadedCount} Uploaded, {skippedCount} Skipped in {stopwatch.Elapsed.TotalSeconds:0.#}s.");
+        }
+
+        private static string GetAvailableLocalPath(string path)
+        {
+            string? directory = Path.GetDirectoryName(path);
+            string stem = Path.GetFileNameWithoutExtension(path);
+            string extension = Path.GetExtension(path);
+            for (int n = 1; ; n++)
+            {
+                string candidate = Path.Combine(directory ?? string.Empty, $"{stem} ({n}){extension}");
+                if (!File.Exists(candidate)) return candidate;
+            }
+        }
+
+        private static string GetAvailableRemotePath(string path, string remoteBase, Dictionary<string, long> index)
+        {
+            string directory = Path.GetDirectoryName(path)?.Replace('\\', '/') ?? remoteBase;
+            string stem = Path.GetFileNameWithoutExtension(path);
+            string extension = Path.GetExtension(path);
+            for (int n = 1; ; n++)
+            {
+                string candidate = $"{directory}/{stem} ({n}){extension}";
+                string relative = candidate.Substring(remoteBase.Length).TrimStart('/');
+                if (!index.ContainsKey(relative)) return candidate;
+            }
         }
 
         private void ReportProgress(

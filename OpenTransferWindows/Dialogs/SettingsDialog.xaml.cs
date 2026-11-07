@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using Button = System.Windows.Controls.Button;
 using System.Windows.Media;
 using Microsoft.Win32;
 using openTransferWPF.Models;

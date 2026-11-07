@@ -58,5 +58,21 @@ namespace openTransferWPF.Services
                 System.Diagnostics.Debug.WriteLine($"Failed to save settings: {ex.Message}");
             }
         }
+
+        public void Export(string destination) => File.Copy(_settingsFilePath, destination, true);
+
+        public bool Import(string source)
+        {
+            try
+            {
+                var imported = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(source));
+                if (imported == null) return false;
+                SaveSettings(imported);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public void Reset() => SaveSettings(new AppSettings());
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,6 +14,9 @@ namespace openTransferWPF.Services
     public class AdbService
     {
         private const string DefaultSdkAdb = @"C:\Users\Jaseem\AppData\Local\Android\Sdk\platform-tools\adb.exe";
+        private int _defaultTimeoutMs = 30000;
+        private bool _debugLogging;
+        private readonly object _logLock = new();
         public string AdbPath { get; private set; }
 
         public AdbService(string? customPath = null)
@@ -22,6 +26,8 @@ namespace openTransferWPF.Services
 
         public void UpdateSettings(AppSettings settings)
         {
+            _defaultTimeoutMs = Math.Max(5000, settings.AdbTimeoutSeconds * 1000);
+            _debugLogging = settings.EnableDebugLogging;
             if (!string.IsNullOrEmpty(settings.CustomAdbPath) && File.Exists(settings.CustomAdbPath))
             {
                 AdbPath = settings.CustomAdbPath;
@@ -100,8 +106,46 @@ namespace openTransferWPF.Services
             remotePath = remotePath.TrimEnd('/');
             if (string.IsNullOrEmpty(remotePath)) remotePath = "/sdcard";
 
+            // stat produces a stable, machine-readable result across Android versions.
+            // The old ls parser depended on one exact date/owner layout and silently
+            // returned zero sizes whenever a device used a different layout.
+            string escapedPath = EscapeShellArg(remotePath);
+            string statCmd = $"find {escapedPath} -mindepth 1 -maxdepth 1 -exec stat -L -c '%F|%s|%Y|%n' {{}} \\;";
+            var statResult = await RunBase64ShellCmdAsync(serial, statCmd);
+            if (statResult.ExitCode == 0 && !string.IsNullOrWhiteSpace(statResult.Stdout))
+            {
+                foreach (var line in statResult.Stdout.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = line.Split('|', 4);
+                    if (parts.Length != 4 || !long.TryParse(parts[1], out long size)) continue;
+
+                    string fullPath = parts[3];
+                    string name = fullPath.StartsWith(remotePath + "/", StringComparison.Ordinal)
+                        ? fullPath.Substring(remotePath.Length + 1)
+                        : Path.GetFileName(fullPath);
+                    if (name is "." or ".." || name.Contains('/')) continue;
+
+                    bool isDirectory = parts[0].Contains("directory", StringComparison.OrdinalIgnoreCase);
+                    string modified = long.TryParse(parts[2], out long unixSeconds)
+                        ? DateTimeOffset.FromUnixTimeSeconds(unixSeconds).LocalDateTime.ToString("yyyy-MM-dd HH:mm")
+                        : "Unknown";
+                    items.Add(new AndroidFileItem
+                    {
+                        Name = name,
+                        Path = fullPath,
+                        IsDir = isDirectory,
+                        SizeBytes = isDirectory ? -1 : size,
+                        ModifiedDateStr = modified
+                        ,ModifiedUnixSeconds = long.TryParse(parts[2], out long parsedUnix) ? parsedUnix : 0
+                    });
+                }
+
+                SortDirectoryItems(items);
+                return items;
+            }
+
             string targetCmdPath = remotePath + "/";
-            string shellCmd = $"ls -la '{targetCmdPath}'";
+            string shellCmd = $"ls -la {EscapeShellArg(targetCmdPath)}";
             
             var result = await RunBase64ShellCmdAsync(serial, shellCmd);
             if (result.ExitCode != 0 || string.IsNullOrWhiteSpace(result.Stdout))
@@ -126,7 +170,7 @@ namespace openTransferWPF.Services
                             Name = name,
                             Path = $"{remotePath}/{name}",
                             IsDir = isDir,
-                            SizeBytes = 0,
+                            SizeBytes = isDir ? -1 : 0,
                             ModifiedDateStr = "Unknown"
                         });
                     }
@@ -150,20 +194,32 @@ namespace openTransferWPF.Services
                     Name = nameStr,
                     Path = $"{remotePath}/{nameStr}",
                     IsDir = isDirectory,
-                    SizeBytes = isDirectory ? 0 : size,
+                    SizeBytes = isDirectory ? -1 : size,
                     ModifiedDateStr = dateStr
                 });
             }
 
-            items.Sort((a, b) =>
-            {
-                if (a.IsDir && !b.IsDir) return -1;
-                if (!a.IsDir && b.IsDir) return 1;
-                return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-            });
+            SortDirectoryItems(items);
 
             return items;
         }
+
+        private static void SortDirectoryItems(List<AndroidFileItem> items) => items.Sort((a, b) =>
+        {
+            if (a.IsDir && !b.IsDir) return -1;
+            if (!a.IsDir && b.IsDir) return 1;
+            return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+        });
+
+        public async Task<long> GetDirectorySizeAsync(string serial, string remotePath)
+        {
+            var result = await RunBase64ShellCmdAsync(serial, $"du -sk {EscapeShellArg(remotePath)}", timeoutMs: 45000);
+            if (result.ExitCode != 0) return -1;
+            var first = result.Stdout.Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            return long.TryParse(first, out long kib) ? kib * 1024 : -1;
+        }
+
+        private static string EscapeShellArg(string value) => "'" + value.Replace("'", "'\\''") + "'";
 
         /// <summary>
         /// Ultra-fast remote tree scanner returning a Dictionary of (RelativePath -> SizeInBytes).
@@ -175,7 +231,7 @@ namespace openTransferWPF.Services
             remoteRoot = remoteRoot.TrimEnd('/');
             
             // Single command to retrieve path|size for all files in tree
-            string statCmd = $"find '{remoteRoot}' -type f -exec stat -c '%n|%s' {{}} +";
+            string statCmd = $"find {EscapeShellArg(remoteRoot)} -type f -exec stat -c '%n|%s' {{}} +";
             var result = await RunBase64ShellCmdAsync(serial, statCmd, timeoutMs: 45000);
 
             if (result.ExitCode != 0 || string.IsNullOrWhiteSpace(result.Stdout))
@@ -208,7 +264,7 @@ namespace openTransferWPF.Services
             var files = new List<AndroidFileItem>();
             remoteRoot = remoteRoot.TrimEnd('/');
             
-            string statCmd = $"find '{remoteRoot}' -type f -exec stat -c '%n|%s' {{}} +";
+            string statCmd = $"find {EscapeShellArg(remoteRoot)} -type f -exec stat -c '%n|%s|%Y' {{}} +";
             var result = await RunBase64ShellCmdAsync(serial, statCmd, timeoutMs: 45000);
 
             if (result.ExitCode != 0 || string.IsNullOrWhiteSpace(result.Stdout))
@@ -229,7 +285,8 @@ namespace openTransferWPF.Services
                         Name = Path.GetFileName(fullPath),
                         Path = fullPath,
                         IsDir = false,
-                        SizeBytes = size
+                        SizeBytes = size,
+                        ModifiedUnixSeconds = parts.Length >= 3 && long.TryParse(parts[2], out long unix) ? unix : 0
                     });
                 }
             }
@@ -269,6 +326,34 @@ namespace openTransferWPF.Services
             return "Free --";
         }
 
+        public async Task<string?> FindRemovableStorageAsync(string serial)
+        {
+            var result = await RunBase64ShellCmdAsync(serial, "find /storage -mindepth 1 -maxdepth 1 -type d 2>/dev/null");
+            if (result.ExitCode != 0) return null;
+            return result.Stdout.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(path => path.Trim())
+                .FirstOrDefault(path => path != "/storage/emulated" && path != "/storage/self" &&
+                    !path.EndsWith("/emulated", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<List<string>> GetStorageRootsAsync(string serial)
+        {
+            var roots = new List<string> { "/sdcard" };
+            var result = await RunBase64ShellCmdAsync(serial, "find /storage -mindepth 1 -maxdepth 1 -type d 2>/dev/null");
+            if (result.ExitCode == 0)
+            {
+                roots.AddRange(result.Stdout.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim()).Where(p => p != "/storage/emulated" && p != "/storage/self" && !p.EndsWith("/emulated")));
+            }
+            return roots.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        public async Task<bool> PathExistsAsync(string serial, string path)
+        {
+            var result = await RunBase64ShellCmdAsync(serial, $"test -e {EscapeShellArg(path)}");
+            return result.ExitCode == 0;
+        }
+
         public async Task<long> GetRemoteFileSizeAsync(string serial, string remoteFilePath)
         {
             string cmd = $"stat -c '%s' '{remoteFilePath}'";
@@ -278,6 +363,19 @@ namespace openTransferWPF.Services
                 return size;
             }
             return -1;
+        }
+
+        public async Task<long> GetRemoteModifiedUnixAsync(string serial, string remoteFilePath)
+        {
+            var res = await RunBase64ShellCmdAsync(serial, $"stat -L -c '%Y' {EscapeShellArg(remoteFilePath)}");
+            return res.ExitCode == 0 && long.TryParse(res.Stdout.Trim(), out long unix) ? unix : -1;
+        }
+
+        public async Task<bool> SetRemoteModifiedTimeAsync(string serial, string remotePath, DateTime localTime)
+        {
+            string stamp = localTime.ToString("yyyyMMddHHmm.ss");
+            var result = await RunBase64ShellCmdAsync(serial, $"touch -t {stamp} {EscapeShellArg(remotePath)}");
+            return result.ExitCode == 0;
         }
 
         public async Task<bool> CreateDirectoryAsync(string serial, string remoteFolderPath)
@@ -716,7 +814,7 @@ echo $deleted".Replace("\r", "");
             return false;
         }
 
-        private async Task<(int ExitCode, string Stdout, string Stderr)> RunBase64ShellCmdAsync(string serial, string shellCommand, int timeoutMs = 15000)
+        private async Task<(int ExitCode, string Stdout, string Stderr)> RunBase64ShellCmdAsync(string serial, string shellCommand, int timeoutMs = 0)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(shellCommand);
             string b64 = Convert.ToBase64String(bytes);
@@ -724,10 +822,11 @@ echo $deleted".Replace("\r", "");
             return await RunProcessAsync(AdbPath, args, timeoutMs);
         }
 
-        private Task<(int ExitCode, string Stdout, string Stderr)> RunProcessAsync(string exe, string args, int timeoutMs = 15000)
+        private Task<(int ExitCode, string Stdout, string Stderr)> RunProcessAsync(string exe, string args, int timeoutMs = 0)
         {
             return Task.Run(() =>
             {
+                if (timeoutMs <= 0) timeoutMs = _defaultTimeoutMs;
                 var psi = new ProcessStartInfo
                 {
                     FileName = exe,
@@ -749,11 +848,26 @@ echo $deleted".Replace("\r", "");
                 if (!exited)
                 {
                     try { proc.Kill(); } catch { }
+                    WriteDebugLog(exe, args, -1, "", "Timed out");
                     return (-1, "", "Timed out");
                 }
 
+                WriteDebugLog(exe, args, proc.ExitCode, stdout, stderr);
                 return (proc.ExitCode, stdout, stderr);
             });
+        }
+
+        private void WriteDebugLog(string exe, string args, int exitCode, string stdout, string stderr)
+        {
+            if (!_debugLogging) return;
+            try
+            {
+                string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openTransferWPF", "Logs");
+                Directory.CreateDirectory(dir);
+                string entry = $"[{DateTime.Now:O}] {Path.GetFileName(exe)} {args}{Environment.NewLine}Exit: {exitCode}{Environment.NewLine}OUT: {stdout}{Environment.NewLine}ERR: {stderr}{Environment.NewLine}{Environment.NewLine}";
+                lock (_logLock) File.AppendAllText(Path.Combine(dir, $"adb-{DateTime.Now:yyyyMMdd}.log"), entry);
+            }
+            catch { }
         }
     }
 }

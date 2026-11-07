@@ -5,10 +5,13 @@ namespace openTransferWPF.Models
     public class AndroidFileItem
     {
         public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public string Path { get; set; } = string.Empty;
         public bool IsDir { get; set; }
         public long SizeBytes { get; set; }
         public string ModifiedDateStr { get; set; } = string.Empty;
+        public long ModifiedUnixSeconds { get; set; }
+        public string FolderBrush { get; set; } = "#F59E0B";
 
         public string Icon
         {
@@ -43,7 +46,7 @@ namespace openTransferWPF.Models
         {
             get
             {
-                if (IsDir) return "--";
+                if (IsDir && SizeBytes < 0) return "--";
                 if (SizeBytes < 0) return "--";
                 if (SizeBytes < 1024) return $"{SizeBytes} B";
                 if (SizeBytes < 1024 * 1024) return $"{SizeBytes / 1024.0:0.#} KB";

@@ -4,6 +4,27 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.5] - 2026-11-07
+
+### 🎨 Added
+- **Premium Theme System:** Emerald Glass, VS Code, Nord Aurora, and Dracula palettes, each with Light, Dark, and Follow Windows modes plus instant full-UI preview.
+- **Animated Transfer Experience:** Direction-aware phone/PC file animation, flowing particles, pause/resume synchronization, human-readable ETA, live speed, remaining bytes, and completion notifications.
+- **Quick Access & Favorites:** Automatically detected Camera, Screenshots, Downloads, WhatsApp, and Telegram locations plus custom pinned Android folders.
+- **Explorer Productivity:** Internal/removable storage selector, search operators (`ext:`, `min:`, `max:`, `after:`), persistent name/size/date sorting, and local file preview.
+- **Transfer Reliability:** Serialized transfer queue, persistent transfer history, automatic retry, failed-file review, disconnect warnings, post-copy verification, and conflict policies.
+- **Settings & Diagnostics:** Export/import/reset, launch-at-startup, tray support, ADB timeout, debug logging, and configurable log retention/cleanup.
+
+### 🛠️ Fixed & Improved
+- **Reliable Metadata & Sizes:** Replaced device-specific `ls` parsing with stable `find`/`stat`; file names with spaces, file sizes, optional folder sizes, and modified dates now resolve correctly.
+- **Live Storage Information:** Free capacity refreshes during polling, manual refreshes, navigation, and transfer completion; removable SD cards are detected automatically.
+- **Settings Wiring:** Folder colors, explorer visibility, refresh interval, reconnect, comparison, retry, verification, metadata preservation, and structure settings now affect runtime behavior.
+- **Navigation Stability:** Stale asynchronous directory results can no longer overwrite newer navigation, and overlapping device polling is suppressed.
+- **Version Consistency:** About, update checks, project metadata, installer, and release automation now share version `1.2.5`.
+- **English-only Cleanup:** Removed language, transfer-mode, and buffer-size controls that did not map to real ADB capabilities.
+- **Safer Releases:** Release automation uses normal branch pushes and annotated tags instead of force-pushing Git history.
+
+---
+
 ## [1.2.4] - 2026-08-03
 
 ### 🛠️ Fixed & Improved

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media.Animation;
 using openTransferWPF.Models;
 using openTransferWPF.Services;
 
@@ -13,12 +14,72 @@ namespace openTransferWPF.Dialogs
         private readonly CopyEngine _copyEngine;
         private readonly CancellationTokenSource _cts;
         private string _targetFolderPath = string.Empty;
+        private Storyboard? _transferAnimation;
+        private string _animationDirection = string.Empty;
 
         public TransferProgressDialog(CopyEngine copyEngine, CancellationTokenSource cts)
         {
             InitializeComponent();
             _copyEngine = copyEngine;
             _cts = cts;
+            Loaded += (_, _) => StartTransferAnimation("Downloading");
+        }
+
+        private void StartTransferAnimation(string direction)
+        {
+            bool upload = direction.Contains("Upload", StringComparison.OrdinalIgnoreCase);
+            string normalized = upload ? "Upload" : "Download";
+            if (_animationDirection == normalized && _transferAnimation != null) return;
+            _animationDirection = normalized;
+
+            _transferAnimation?.Stop(this);
+            TxtSourceDevice.Text = upload ? "🖥️" : "📱";
+            TxtTargetDevice.Text = upload ? "📱" : "🖥️";
+
+            double from = upload ? 262 : 0;
+            double to = upload ? 0 : 262;
+            _transferAnimation = new Storyboard { RepeatBehavior = RepeatBehavior.Forever };
+
+            AddMotion(_transferAnimation, FileTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.Zero);
+            AddMotion(_transferAnimation, ParticleOneTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.FromMilliseconds(170));
+            AddMotion(_transferAnimation, ParticleTwoTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.FromMilliseconds(330));
+
+            var pulseX = new DoubleAnimation(0.88, 1.12, TimeSpan.FromMilliseconds(360))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+            };
+            Storyboard.SetTarget(pulseX, FileScale);
+            Storyboard.SetTargetProperty(pulseX, new PropertyPath("ScaleX"));
+            _transferAnimation.Children.Add(pulseX);
+
+            var pulseY = pulseX.Clone();
+            Storyboard.SetTarget(pulseY, FileScale);
+            Storyboard.SetTargetProperty(pulseY, new PropertyPath("ScaleY"));
+            _transferAnimation.Children.Add(pulseY);
+
+            var particleFade = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever, Duration = TimeSpan.FromSeconds(1.45) };
+            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0)));
+            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0.85, KeyTime.FromPercent(0.22)));
+            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0.82)));
+            Storyboard.SetTarget(particleFade, ParticleOne);
+            Storyboard.SetTargetProperty(particleFade, new PropertyPath("Opacity"));
+            _transferAnimation.Children.Add(particleFade);
+
+            _transferAnimation.Begin(this, true);
+        }
+
+        private static void AddMotion(Storyboard storyboard, DependencyObject target, double from, double to, TimeSpan duration, TimeSpan delay)
+        {
+            var motion = new DoubleAnimation(from, to, duration)
+            {
+                BeginTime = delay,
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            Storyboard.SetTarget(motion, target);
+            Storyboard.SetTargetProperty(motion, new PropertyPath("X"));
+            storyboard.Children.Add(motion);
         }
 
         private static string FormatBytes(long bytes)
@@ -35,8 +96,23 @@ namespace openTransferWPF.Dialogs
             return $"{dblBytes:0.##} {suffixes[i]}";
         }
 
+        private static string FormatEta(int seconds, double percent, double speedMbPerSec)
+        {
+            if (seconds <= 0 || speedMbPerSec <= 0 || percent < 1) return "Estimating time...";
+            if (seconds < 60) return $"About {seconds} sec remaining";
+
+            var time = TimeSpan.FromSeconds(seconds);
+            if (time.TotalHours >= 24) return "More than a day remaining";
+            if (time.TotalHours >= 1)
+                return $"About {(int)time.TotalHours} hr {time.Minutes} min remaining";
+            return time.Seconds > 0
+                ? $"About {time.Minutes} min {time.Seconds} sec remaining"
+                : $"About {time.Minutes} min remaining";
+        }
+
         public void UpdateProgress(CopyEngineProgress p)
         {
+            StartTransferAnimation(p.DirectionLabel);
             // Current File Progress
             PrgFileBar.Value = p.CurrentFilePercent;
             TxtCurrentFilePercent.Text = $"{p.CurrentFilePercent:0}%";
@@ -58,15 +134,17 @@ namespace openTransferWPF.Dialogs
             // Speed & ETA Stats
             TxtSpeed.Text = $"⚡ {p.SpeedMbPerSec:0.#} MB/s";
             TxtSkipped.Text = $"✨ {p.SkippedCount} Skipped | {p.CopiedCount} Copied";
-            TxtEta.Text = p.EtaSeconds > 0 ? $"About {p.EtaSeconds}s remaining" : "Calculating...";
+            TxtEta.Text = FormatEta(p.EtaSeconds, p.TotalPercent, p.SpeedMbPerSec);
 
             if (p.IsPaused)
             {
+                _transferAnimation?.Pause(this);
                 BtnPause.Content = "Resume";
                 TxtHeader.Text = "Transfer Paused";
             }
             else
             {
+                _transferAnimation?.Resume(this);
                 BtnPause.Content = "Pause";
                 TxtHeader.Text = $"{p.DirectionLabel} files...";
             }
@@ -77,6 +155,7 @@ namespace openTransferWPF.Dialogs
         /// </summary>
         public void UpdateSplitProgress(SplitFolderProgress p)
         {
+            StartTransferAnimation("Downloading");
             PrgBar.Value = p.Percent;
             TxtTotalPercent.Text = $"{p.Percent}%";
 
@@ -94,6 +173,7 @@ namespace openTransferWPF.Dialogs
 
         public void ShowSplitCompleteState(int totalMoved)
         {
+            _transferAnimation?.Stop(this);
             PnlProgressState.Visibility = Visibility.Collapsed;
             PnlCompleteState.Visibility = Visibility.Visible;
 
@@ -107,6 +187,7 @@ namespace openTransferWPF.Dialogs
         /// </summary>
         public void ShowCompleteState(int copiedCount, int totalCount, string destFolder, bool isDownload)
         {
+            _transferAnimation?.Stop(this);
             _targetFolderPath = destFolder;
             PnlProgressState.Visibility = Visibility.Collapsed;
             PnlCompleteState.Visibility = Visibility.Visible;
@@ -114,6 +195,9 @@ namespace openTransferWPF.Dialogs
             Title = "Transfer Complete";
             string targetDeviceStr = isDownload ? "your local computer" : "your Android phone";
             TxtCompleteMessage.Text = $"All {totalCount} selected files have been successfully transferred to {targetDeviceStr}.";
+            BtnShowFailed.Visibility = _copyEngine.LastFailedItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (_copyEngine.LastFailedItems.Count > 0)
+                TxtCompleteMessage.Text = $"{copiedCount} of {totalCount} files completed. {_copyEngine.LastFailedItems.Count} failed and can be reviewed.";
 
             if (!isDownload || !Directory.Exists(_targetFolderPath))
             {
@@ -130,12 +214,14 @@ namespace openTransferWPF.Dialogs
             if (_copyEngine.IsPaused)
             {
                 _copyEngine.Resume();
+                _transferAnimation?.Resume(this);
                 BtnPause.Content = "Pause";
                 TxtHeader.Text = "Copying files...";
             }
             else
             {
                 _copyEngine.Pause();
+                _transferAnimation?.Pause(this);
                 BtnPause.Content = "Resume";
                 TxtHeader.Text = "Transfer Paused";
             }
@@ -170,6 +256,11 @@ namespace openTransferWPF.Dialogs
         private void BtnDone_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void BtnShowFailed_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(string.Join(Environment.NewLine, _copyEngine.LastFailedItems), "Failed Files", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 }

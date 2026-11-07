@@ -46,22 +46,8 @@
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <Grid Width="42" Height="34" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <Path Data="M 2.5 3 C 2.5 2.2 3.2 1.5 4.5 1.5 L 12.5 1.5 C 13.8 1.5 14.5 2.2 15.5 3.2 L 17 5 L 33 5 C 34.5 5 35.5 6 35.5 7.5 L 35.5 27 C 35.5 28.5 34.5 29.5 33 29.5 L 4.5 29.5 C 3 29.5 2.5 28.5 2.5 27 Z">
-                                                            <Path.Fill>
-                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                    <GradientStop Color="#D97706" Offset="0.0"/>
-                                                                    <GradientStop Color="#B45309" Offset="1.0"/>
-                                                                </LinearGradientBrush>
-                                                            </Path.Fill>
-                                                        </Path>
-                                                        <Path Data="M 1 7 C 1 6 2 5 3.8 5 L 34.2 5 C 36 5 37 6 37 7 L 34.8 26 C 34.4 27.5 32.8 29 31 29 L 7 29 C 5.2 29 3.6 27.5 3.2 26 Z">
-                                                            <Path.Fill>
-                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                    <GradientStop Color="#FBBF24" Offset="0.0"/>
-                                                                    <GradientStop Color="#F59E0B" Offset="1.0"/>
-                                                                </LinearGradientBrush>
-                                                            </Path.Fill>
-                                                        </Path>
+                                                        <Path Data="M 2.5 3 C 2.5 2.2 3.2 1.5 4.5 1.5 L 12.5 1.5 C 13.8 1.5 14.5 2.2 15.5 3.2 L 17 5 L 33 5 C 34.5 5 35.5 6 35.5 7.5 L 35.5 27 C 35.5 28.5 34.5 29.5 33 29.5 L 4.5 29.5 C 3 29.5 2.5 28.5 2.5 27 Z" Fill="{Binding FolderBrush}" Opacity="0.72"/>
+                                                        <Path Data="M 1 7 C 1 6 2 5 3.8 5 L 34.2 5 C 36 5 37 6 37 7 L 34.8 26 C 34.4 27.5 32.8 29 31 29 L 7 29 C 5.2 29 3.6 27.5 3.2 26 Z" Fill="{Binding FolderBrush}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </Setter.Value>
@@ -73,7 +59,7 @@
                     </ContentControl>
 
                     <!-- Filename -->
-                    <TextBlock Grid.Row="1" Text="{Binding Name}" Style="{StaticResource FluxBodySm}"
+                    <TextBlock Grid.Row="1" Text="{Binding DisplayName}" Style="{StaticResource FluxBodySm}"
                                FontWeight="SemiBold" TextAlignment="Center"
                                TextTrimming="CharacterEllipsis" MaxHeight="32" Margin="0,4,0,2"/>
 
@@ -148,6 +134,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="📱" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="BtnRootFolder_Click" ToolTip="Go to root folder"/>
@@ -155,7 +142,10 @@
                                   BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                   FontFamily="Inter, Segoe UI, sans-serif" FontSize="13" FontWeight="Bold"
                                   Foreground="{StaticResource FluxOnSurface}" Margin="0,0,8,0"/>
-                        <TextBox Grid.Column="2" x:Name="TxtPath" Text="/sdcard" KeyDown="TxtPath_KeyDown"
+                        <ComboBox Grid.Column="2" x:Name="CmbStorageRoots" SelectionChanged="CmbStorageRoots_SelectionChanged"
+                                  BorderThickness="0" Background="Transparent" MinWidth="90" Margin="0,0,8,0"
+                                  Foreground="{StaticResource FluxOnSurfaceVariant}" ToolTip="Storage location"/>
+                        <TextBox Grid.Column="3" x:Name="TxtPath" Text="/sdcard" KeyDown="TxtPath_KeyDown"
                                  BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                  FontFamily="Inter, Segoe UI, sans-serif" FontSize="12"
                                  Foreground="{StaticResource FluxOnSurfaceVariant}"/>
@@ -175,7 +165,7 @@
                         <TextBox Grid.Column="1" x:Name="TxtSearch" TextChanged="TxtSearch_TextChanged"
                                  BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                  FontFamily="Inter, Segoe UI, sans-serif" FontSize="13"
-                                 Foreground="{StaticResource FluxOnSurface}" ToolTip="Search sdcard"/>
+                                 Foreground="{StaticResource FluxOnSurface}" ToolTip="Search; filters: ext:jpg min:10MB max:1GB after:2026-01-01"/>
                     </Grid>
                 </Border>
             </Grid>
@@ -185,6 +175,10 @@
         <Border Grid.Row="1" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,1"
                 Padding="14,6" Background="{StaticResource FluxSurface}">
             <StackPanel Orientation="Horizontal">
+                <ComboBox x:Name="CmbQuickAccess" Width="150" Margin="0,0,6,0" Padding="6,3"
+                          SelectionChanged="CmbQuickAccess_SelectionChanged" ToolTip="Quick Access and pinned folders"/>
+                <Button Content="★" Click="BtnToggleFavorite_Click" Style="{StaticResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
+                <Rectangle Width="1" Height="16" Fill="{StaticResource FluxOutlineVariant}" Margin="8,0"/>
                 <Button Style="{StaticResource FluxActionButton}" Click="BtnNewFolder_Click">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="📁" Margin="0,0,6,0" Foreground="{StaticResource FluxPrimaryContainer}"/>
@@ -250,6 +244,14 @@
                         <ContextMenu Style="{StaticResource FluxContextMenu}">
                             <MenuItem Header="📥 Download to PC..." Click="BtnCopyToPC_Click"/>
                             <MenuItem Header="📤 Upload Files Here..." Click="BtnUploadFiles_Click"/>
+                            <MenuItem Header="👁 Preview / Open File" Click="BtnPreviewFile_Click"/>
+                            <MenuItem Header="★ Pin Current Folder" Click="BtnToggleFavorite_Click"/>
+                            <MenuItem Header="Sort">
+                                <MenuItem Header="Name" Tag="Name" Click="Sort_Click"/>
+                                <MenuItem Header="Size" Tag="Size" Click="Sort_Click"/>
+                                <MenuItem Header="Modified Date" Tag="Date" Click="Sort_Click"/>
+                                <Separator/><MenuItem Header="Toggle Ascending / Descending" Tag="Toggle" Click="Sort_Click"/>
+                            </MenuItem>
                             <Separator/>
                             <MenuItem Header="📊 Analyze Storage Space..." Click="ContextAnalyzeStorage_Click"/>
                             <MenuItem Header="Split Folder..." Click="ContextSplitFolder_Click"/>
@@ -293,23 +295,9 @@
                                                                         <DataTemplate>
                                                                             <Grid Width="22" Height="18" VerticalAlignment="Center">
                                                                                 <!-- Back Folder Tab -->
-                                                                                <Path Data="M 1.5 2 C 1.5 1.5 2 1 2.8 1 L 7.2 1 C 8 1 8.5 1.5 9 2.2 L 10 3.8 L 19 3.8 C 20 3.8 20.5 4.3 20.5 5.3 L 20.5 15.5 C 20.5 16.5 20 17 19 17 L 2.8 17 C 1.8 17 1.5 16.5 1.5 15.5 Z">
-                                                                                    <Path.Fill>
-                                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                            <GradientStop Color="#D97706" Offset="0.0"/>
-                                                                                            <GradientStop Color="#B45309" Offset="1.0"/>
-                                                                                        </LinearGradientBrush>
-                                                                                    </Path.Fill>
-                                                                                </Path>
+                                                                                <Path Data="M 1.5 2 C 1.5 1.5 2 1 2.8 1 L 7.2 1 C 8 1 8.5 1.5 9 2.2 L 10 3.8 L 19 3.8 C 20 3.8 20.5 4.3 20.5 5.3 L 20.5 15.5 C 20.5 16.5 20 17 19 17 L 2.8 17 C 1.8 17 1.5 16.5 1.5 15.5 Z" Fill="{Binding FolderBrush}" Opacity="0.72"/>
                                                                                 <!-- Front Folder Body -->
-                                                                                <Path Data="M 0.5 5 C 0.5 4.3 1.2 3.8 2.2 3.8 L 19.8 3.8 C 20.8 3.8 21.5 4.3 21.5 5 L 20.2 15 C 20 16 19.1 16.8 18 16.8 L 4 16.8 C 2.9 16.8 2 16 1.8 15 Z">
-                                                                                    <Path.Fill>
-                                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                            <GradientStop Color="#FBBF24" Offset="0.0"/>
-                                                                                            <GradientStop Color="#F59E0B" Offset="1.0"/>
-                                                                                        </LinearGradientBrush>
-                                                                                    </Path.Fill>
-                                                                                </Path>
+                                                                                <Path Data="M 0.5 5 C 0.5 4.3 1.2 3.8 2.2 3.8 L 19.8 3.8 C 20.8 3.8 21.5 4.3 21.5 5 L 20.2 15 C 20 16 19.1 16.8 18 16.8 L 4 16.8 C 2.9 16.8 2 16 1.8 15 Z" Fill="{Binding FolderBrush}"/>
                                                                                 <!-- Highlight Edge -->
                                                                                 <Path Data="M 1 4.5 L 21 4.5 L 20.6 6.5 L 1.4 6.5 Z" Fill="#FFFFFF" Opacity="0.25"/>
                                                                             </Grid>
@@ -322,7 +310,7 @@
                                                 </ContentControl.Style>
                                             </ContentControl>
 
-                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"
                                                        Style="{StaticResource FluxBodyMd}" FontWeight="SemiBold"/>
                                         </StackPanel>
                                     </DataTemplate>
@@ -471,18 +459,29 @@
                                 <ScrollViewer x:Name="PnlAppearance" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
                                         <TextBlock Text="Theme Preferences" Style="{StaticResource FluxTitleMd}" Margin="0,0,0,12"/>
-                                        <TextBlock Text="Application Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                        <ComboBox x:Name="CmbTheme" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
-                                            <ComboBoxItem Content="System Default"/>
-                                            <ComboBoxItem Content="Light Theme"/>
-                                            <ComboBoxItem Content="Dark Theme"/>
+                                        <TextBlock Text="Premium Color Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbThemePalette" SelectedIndex="0" Margin="0,0,0,12" Padding="8,4" SelectionChanged="AppearanceTheme_SelectionChanged">
+                                            <ComboBoxItem Content="Emerald Glass"/>
+                                            <ComboBoxItem Content="VS Code"/>
+                                            <ComboBoxItem Content="Nord Aurora"/>
+                                            <ComboBoxItem Content="Dracula"/>
                                         </ComboBox>
 
-                                        <TextBlock Text="Language:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                        <ComboBox x:Name="CmbLanguage" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
-                                            <ComboBoxItem Content="English"/>
-                                            <ComboBoxItem Content="Malayalam (Future)"/>
+                                        <TextBlock Text="Theme Appearance:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbThemeMode" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4" SelectionChanged="AppearanceTheme_SelectionChanged">
+                                            <ComboBoxItem Content="Follow Windows"/>
+                                            <ComboBoxItem Content="Light"/>
+                                            <ComboBoxItem Content="Dark"/>
                                         </ComboBox>
+
+                                        <Border Background="{StaticResource FluxSurfaceContainerLow}" BorderBrush="{StaticResource FluxOutlineVariant}"
+                                                BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                            <StackPanel>
+                                                <TextBlock Text="Live theme preview" FontWeight="SemiBold" Foreground="{StaticResource FluxOnSurface}"/>
+                                                <TextBlock Text="Surfaces, cards, navigation, selections and progress accents update instantly."
+                                                           FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+                                            </StackPanel>
+                                        </Border>
 
                                         <TextBlock Text="Folder Accent Color:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbFolderColor" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
@@ -514,23 +513,6 @@
                                             <ComboBoxItem Content="Filename Only"/>
                                             <ComboBoxItem Content="Filename + Size (Default)"/>
                                             <ComboBoxItem Content="Filename + Size + Modified Date"/>
-                                        </ComboBox>
-
-                                        <TextBlock Text="Transfer Performance Mode:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                        <ComboBox x:Name="CmbTransferMode" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
-                                            <ComboBoxItem Content="Maximum Speed"/>
-                                            <ComboBoxItem Content="Balanced (Default)"/>
-                                            <ComboBoxItem Content="Maximum Compatibility"/>
-                                        </ComboBox>
-
-                                        <TextBlock Text="Buffer Size:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                        <ComboBox x:Name="CmbBufferSize" SelectedIndex="0" Margin="0,0,0,14" Padding="8,4">
-                                            <ComboBoxItem Content="Auto (Recommended)"/>
-                                            <ComboBoxItem Content="512 KB"/>
-                                            <ComboBoxItem Content="1 MB"/>
-                                            <ComboBoxItem Content="2 MB"/>
-                                            <ComboBoxItem Content="4 MB"/>
-                                            <ComboBoxItem Content="8 MB"/>
                                         </ComboBox>
 
                                         <CheckBox x:Name="ChkVerifyCopied" Content="Verify copied files after transfer" IsChecked="True" Margin="0,0,0,8"/>
@@ -640,6 +622,16 @@
                                         </ComboBox>
 
                                         <CheckBox x:Name="ChkDebugLogging" Content="Enable Debug Logging" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Log Retention:" FontSize="12.5" FontWeight="SemiBold" Margin="0,8,0,6"/>
+                                        <ComboBox x:Name="CmbLogRetention" SelectedIndex="1" Margin="0,0,0,14" Padding="8,4">
+                                            <ComboBoxItem Content="7 days"/><ComboBoxItem Content="14 days"/><ComboBoxItem Content="30 days"/><ComboBoxItem Content="90 days"/>
+                                        </ComboBox>
+                                        <WrapPanel>
+                                            <Button Content="Export Settings" Click="BtnExportSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Import Settings" Click="BtnImportSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Reset Settings" Click="BtnResetSettings_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                            <Button Content="Clear Log Files" Click="BtnClearLogFiles_Click" Style="{StaticResource FluxGhostButton}" Padding="10,5" Margin="0,0,8,8"/>
+                                        </WrapPanel>
                                     </StackPanel>
                                 </ScrollViewer>
 
@@ -656,8 +648,8 @@
 
                                         <Border Background="{StaticResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
                                             <StackPanel>
-                                                <TextBlock Text="Version: 1.2.3" FontSize="12" Margin="0,0,0,4"/>
-                                                <TextBlock Text="Build: 2026.08.02" FontSize="12" Margin="0,0,0,4"/>
+                                                <TextBlock x:Name="TxtAboutVersion" Text="Version: --" FontSize="12" Margin="0,0,0,4"/>
+                                                <TextBlock Text="Build: 2026.11.07" FontSize="12" Margin="0,0,0,4"/>
                                                 <TextBlock Text="ADB Binary: Platform Tools 34.0.5" FontSize="12"/>
                                             </StackPanel>
                                         </Border>
@@ -738,7 +730,7 @@
         </Border>
 
         <!-- BOTTOM STATUS FOOTER BAR (Matching Exact Target UI Screenshot) -->
-        <Border Grid.Row="4" Background="#F8F9FA" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="16,8">
+        <Border Grid.Row="4" Background="{StaticResource FluxSurface}" BorderBrush="{StaticResource FluxOutlineVariant}" BorderThickness="0,1,0,0" Padding="16,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -788,6 +780,9 @@
                             <TextBlock Text="📄" Margin="0,0,6,0" Foreground="{StaticResource FluxOnSurfaceVariant}"/>
                             <TextBlock Text="Logs" Foreground="{StaticResource FluxOnSurface}" FontSize="12" FontWeight="Medium"/>
                         </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource FluxActionButton}" Click="BtnHistory_Click" Padding="8,4" Margin="0,0,10,0" ToolTip="Transfer History">
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="🕘" Margin="0,0,5,0"/><TextBlock Text="History"/></StackPanel>
                     </Button>
 
                     <!-- View Toggle Group -->

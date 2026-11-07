@@ -1,0 +1,25 @@
+<Window x:Class="openTransferWPF.Dialogs.TransferHistoryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Transfer History" Width="720" Height="460" WindowStartupLocation="CenterOwner"
+        Background="{StaticResource FluxSurface}" Foreground="{StaticResource FluxOnSurface}">
+    <Grid Margin="20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,12">
+            <TextBlock Text="Transfer History" Style="{StaticResource FluxHeadlineMd}"/>
+            <TextBlock Text="Recent uploads and downloads stored locally on this PC." Foreground="{StaticResource FluxOnSurfaceVariant}"/>
+        </StackPanel>
+        <ListView x:Name="LstHistory" Grid.Row="1" Background="{StaticResource FluxSurfaceContainerLowest}" BorderBrush="{StaticResource FluxOutlineVariant}">
+            <ListView.View><GridView>
+                <GridViewColumn Header="DATE" Width="135" DisplayMemberBinding="{Binding DisplayTime}"/>
+                <GridViewColumn Header="TRANSFER" Width="250" DisplayMemberBinding="{Binding Summary}"/>
+                <GridViewColumn Header="SOURCE" Width="140" DisplayMemberBinding="{Binding Source}"/>
+                <GridViewColumn Header="DESTINATION" Width="140" DisplayMemberBinding="{Binding Destination}"/>
+            </GridView></ListView.View>
+        </ListView>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Clear History" Click="Clear_Click" Style="{StaticResource FluxGhostButton}" Margin="0,0,8,0" Padding="14,6"/>
+            <Button Content="Close" Click="Close_Click" Style="{StaticResource FluxPrimaryButton}" Padding="18,6"/>
+        </StackPanel>
+    </Grid>
+</Window>

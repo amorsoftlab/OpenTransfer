@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace openTransferWPF.Models
 {
@@ -11,7 +12,9 @@ namespace openTransferWPF.Models
         public bool AutoReconnect { get; set; } = true;
 
         // --- APPEARANCE ---
-        public string Theme { get; set; } = "System"; // "System", "Light", "Dark"
+        public string Theme { get; set; } = "System"; // Legacy setting retained for migration
+        public string ThemePalette { get; set; } = "Emerald"; // Emerald, VSCode, Nord, Dracula
+        public string ThemeMode { get; set; } = "System"; // System, Light, Dark
         public string AccentColor { get; set; } = "#005fb8";
         public string FolderColor { get; set; } = "Yellow"; // "Yellow", "Blue", "Green", "Purple", "Red", "Orange"
         public string Language { get; set; } = "English"; // "English", "Malayalam"
@@ -37,6 +40,9 @@ namespace openTransferWPF.Models
         public bool PreserveModifiedDate { get; set; } = true;
         public bool PreserveFolderStructure { get; set; } = true;
         public bool CreateMissingFolders { get; set; } = true;
+        public List<string> FavoritePaths { get; set; } = new();
+        public string SortBy { get; set; } = "Name";
+        public bool SortDescending { get; set; } = false;
 
         // --- AUTO-SPLIT ON TRANSFER ---
         public bool AutoSplitOnTransfer { get; set; } = false;
@@ -47,5 +53,6 @@ namespace openTransferWPF.Models
         public string CustomAdbPath { get; set; } = string.Empty;
         public int AdbTimeoutSeconds { get; set; } = 30; // 30, 60, 120
         public bool EnableDebugLogging { get; set; } = false;
+        public int LogRetentionDays { get; set; } = 14;
     }
 }

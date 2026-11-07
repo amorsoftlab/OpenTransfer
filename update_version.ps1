@@ -1,7 +1,9 @@
 $ErrorActionPreference = "Stop"
 
-# Extract current version from csproj
-$csproj = "openTransferWPF.csproj"
+# Resolve every release file from the repository root.
+$repoDir = $PSScriptRoot
+$projectDir = Join-Path $repoDir "OpenTransferWindows"
+$csproj = Join-Path $projectDir "openTransferWPF.csproj"
 $currentVersion = "1.0.0" # Fallback
 
 if (Test-Path $csproj) {
@@ -45,7 +47,7 @@ $AssemblyVersion = "$newVersion.0"
 Write-Host "`nUpdating version from $currentVersion to $newVersion..." -ForegroundColor Cyan
 
 # 1. Update publish_release.ps1
-$publishScript = "publish_release.ps1"
+$publishScript = Join-Path $projectDir "publish_release.ps1"
 if (Test-Path $publishScript) {
     (Get-Content $publishScript) -replace '^\$version\s*=\s*".*"', "`$version = ""$newVersion""" | Set-Content $publishScript
     Write-Host "Updated $publishScript" -ForegroundColor Green
@@ -54,7 +56,7 @@ if (Test-Path $publishScript) {
 }
 
 # 2. Update installer.iss
-$installerScript = "installer.iss"
+$installerScript = Join-Path $projectDir "installer.iss"
 if (Test-Path $installerScript) {
     (Get-Content $installerScript) -replace '^#define\s+MyAppVersion\s+".*"', "#define MyAppVersion ""$newVersion""" | Set-Content $installerScript
     Write-Host "Updated $installerScript" -ForegroundColor Green
@@ -63,7 +65,7 @@ if (Test-Path $installerScript) {
 }
 
 # 3. Update Services\UpdateService.cs
-$updateService = "Services\UpdateService.cs"
+$updateService = Join-Path $projectDir "Services\UpdateService.cs"
 if (Test-Path $updateService) {
     (Get-Content $updateService) -replace 'public\s+string\s+CurrentVersion\s*\{\s*get;\s*set;\s*\}\s*=\s*".*";', "public string CurrentVersion { get; set; } = ""$newVersion"";" `
                                  -replace 'public\s+const\s+string\s+CurrentAppVersion\s*=\s*".*";', "public const string CurrentAppVersion = ""$newVersion"";" | Set-Content $updateService
@@ -77,6 +79,12 @@ if (Test-Path $csproj) {
     (Get-Content $csproj) -replace '<Version>.*</Version>', "<Version>$newVersion</Version>" `
                           -replace '<AssemblyVersion>.*</AssemblyVersion>', "<AssemblyVersion>$AssemblyVersion</AssemblyVersion>" | Set-Content $csproj
     Write-Host "Updated $csproj" -ForegroundColor Green
+}
+
+# 5. Update visible version labels and create a changelog heading when needed.
+$mainWindow = Join-Path $projectDir "MainWindow.xaml"
+if (Test-Path $mainWindow) {
+    (Get-Content $mainWindow) -replace 'Text="Version: \d+\.\d+\.\d+"', "Text=`"Version: $newVersion`"" | Set-Content $mainWindow
 }
 
 Write-Host "`n✅ Version successfully updated to $newVersion across all required files!" -ForegroundColor Cyan
