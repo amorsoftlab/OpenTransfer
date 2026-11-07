@@ -4,6 +4,7 @@
         Title="Open Transfer" Icon="Assets/logo.ico" Height="700" Width="920"
         MinHeight="500" MinWidth="720"
         FontFamily="Inter, Segoe UI, sans-serif"
+        Foreground="{DynamicResource FluxOnSurface}"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -92,8 +93,77 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="TabBorder" Property="Background" Value="#10B981"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource FluxPrimary}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource FluxOnPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Theme-aware replacement for the Windows native ComboBox chrome. -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource FluxOnSurface}"/>
+            <Setter Property="Background" Value="{DynamicResource FluxSurfaceContainerLowest}"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource FluxSurfaceContainerHigh}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource FluxPrimary}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource FluxOnPrimary}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource FluxOnSurface}"/>
+            <Setter Property="Background" Value="{DynamicResource FluxSurfaceContainerLowest}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource FluxOutlineVariant}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="DropDownToggle" Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Chrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/></Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0" Margin="8,2" VerticalAlignment="Center"
+                                                                  Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                                  ContentTemplate="{Binding SelectionBoxItemTemplate, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                                  TextElement.Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"/>
+                                                <Path Grid.Column="1" Data="M 0 0 L 4 4 L 8 0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                      StrokeThickness="1.4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Margin="0,3,0,0" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="320" Background="{DynamicResource FluxSurfaceContainerLowest}"
+                                        BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="1" CornerRadius="4">
+                                    <ScrollViewer><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource FluxPrimary}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.58"/>
+                                <Setter Property="Background" Value="{DynamicResource FluxSurfaceContainer}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -139,6 +209,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="📱" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="BtnRootFolder_Click" ToolTip="Go to root folder"/>
                         <ComboBox Grid.Column="1" x:Name="CmbDevices" SelectionChanged="CmbDevices_SelectionChanged"
+                                  DisplayMemberPath="DisplayName" SelectedValuePath="Serial"
                                   BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
                                   FontFamily="Inter, Segoe UI, sans-serif" FontSize="13" FontWeight="Bold"
                                   Foreground="{DynamicResource FluxOnSurface}" Margin="0,0,8,0"/>
@@ -175,7 +246,7 @@
         <Border Grid.Row="1" BorderBrush="{DynamicResource FluxOutlineVariant}" BorderThickness="0,1,0,1"
                 Padding="14,6" Background="{DynamicResource FluxSurface}">
             <StackPanel Orientation="Horizontal">
-                <ComboBox x:Name="CmbQuickAccess" Width="150" Margin="0,0,6,0" Padding="6,3"
+                <ComboBox x:Name="CmbQuickAccess" Width="180" Margin="0,0,6,0" Padding="6,3"
                           SelectionChanged="CmbQuickAccess_SelectionChanged" ToolTip="Quick Access and pinned folders"/>
                 <Button x:Name="BtnToggleFavorite" Content="★" Click="BtnToggleFavorite_Click" Style="{DynamicResource FluxActionButton}" ToolTip="Pin or unpin current folder"/>
                 <Rectangle Width="1" Height="16" Fill="{DynamicResource FluxOutlineVariant}" Margin="8,0"/>
@@ -459,7 +530,7 @@
                                 <ScrollViewer x:Name="PnlAppearance" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                                     <StackPanel>
                                         <TextBlock Text="Theme Preferences" Style="{DynamicResource FluxTitleMd}" Margin="0,0,0,12"/>
-                                        <TextBlock Text="Premium Color Theme:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Premium Color Theme:" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbThemePalette" SelectedIndex="0" Margin="0,0,0,12" Padding="8,4" SelectionChanged="AppearanceTheme_SelectionChanged">
                                             <ComboBoxItem Content="Emerald Glass"/>
                                             <ComboBoxItem Content="VS Code"/>
@@ -475,7 +546,7 @@
                                             <ComboBoxItem Content="Cyberpunk"/>
                                         </ComboBox>
 
-                                        <TextBlock Text="Theme Appearance:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Theme Appearance:" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbThemeMode" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4" SelectionChanged="AppearanceTheme_SelectionChanged">
                                             <ComboBoxItem Content="Follow Windows"/>
                                             <ComboBoxItem Content="Light"/>
@@ -491,7 +562,7 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <TextBlock Text="Folder Accent Color:" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Folder Accent Color:" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,0,0,6"/>
                                         <ComboBox x:Name="CmbFolderColor" SelectedIndex="0" Margin="0,0,0,16" Padding="8,4">
                                             <ComboBoxItem Content="Classic Yellow"/>
                                             <ComboBoxItem Content="Ocean Blue"/>

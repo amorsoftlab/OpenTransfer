@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Forms = System.Windows.Forms;
 using Button = System.Windows.Controls.Button;
@@ -124,7 +126,7 @@ namespace openTransferWPF
                 CmbDevices.ItemsSource = null;
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
-                TxtFreeStorage.Text = "Free --";
+                TxtFreeStorage.Text = "Storage unavailable";
                 SetConnectionStatus(null);
                 SetDeviceControlsEnabled(false);
                 return;
@@ -139,7 +141,7 @@ namespace openTransferWPF
                 CmbDevices.ItemsSource = null;
                 PnlNoDevice.Visibility = Visibility.Visible;
                 LstFiles.Visibility = Visibility.Collapsed;
-                TxtFreeStorage.Text = "Free --";
+                TxtFreeStorage.Text = "Storage unavailable";
                 SetConnectionStatus(null);
                 SetDeviceControlsEnabled(false);
                 if (!string.IsNullOrEmpty(_activeSerial))
@@ -1095,8 +1097,8 @@ namespace openTransferWPF
         {
             if (_settingsTabButtons == null || _settingsPanels == null) return;
 
-            var greenBrush = (System.Windows.Media.Brush)FindResource("FluxPrimaryContainer");
-            var onPrimaryBrush = System.Windows.Media.Brushes.White;
+            var greenBrush = (System.Windows.Media.Brush)FindResource("FluxPrimary");
+            var onPrimaryBrush = (System.Windows.Media.Brush)FindResource("FluxOnPrimary");
             var onSurfaceBrush = (System.Windows.Media.Brush)FindResource("FluxOnSurface");
 
             for (int i = 0; i < _settingsTabButtons.Length; i++)
@@ -1543,8 +1545,8 @@ namespace openTransferWPF
                 ("Solarized", true)   => new[] { "#2AA198", "#002B36", "#268BD2", "#FDF6E3", "#002B36", "#073642", "#0B3B46", "#124651", "#1B4F59", "#EEE8D5", "#93A1A1", "#657B83", "#30545D" },
                 ("OneDark", false)    => new[] { "#4078F2", "#FFFFFF", "#A626A4", "#FFFFFF", "#F5F5F5", "#FFFFFF", "#FAFAFA", "#EAEAEB", "#DEDFE1", "#383A42", "#696C77", "#818387", "#C8C9CB" },
                 ("OneDark", true)     => new[] { "#61AFEF", "#282C34", "#C678DD", "#FFFFFF", "#21252B", "#282C34", "#2C313A", "#333842", "#3E4451", "#ABB2BF", "#9DA5B4", "#7F848E", "#4B5263" },
-                ("GitHub", false)     => new[] { "#0969DA", "#FFFFFF", "#1F883D", "#FFFFFF", "#F6F8FA", "#FFFFFF", "#F6F8FA", "#EAEEF2", "#D8DEE4", "#1F2328", "#59636E", "#6E7781", "#D0D7DE" },
-                ("GitHub", true)      => new[] { "#58A6FF", "#0D1117", "#238636", "#FFFFFF", "#0D1117", "#161B22", "#1C2128", "#21262D", "#30363D", "#F0F6FC", "#B1BAC4", "#8B949E", "#30363D" },
+                ("GitHub", false)     => new[] { "#0969DA", "#FFFFFF", "#1F6FEB", "#FFFFFF", "#F6F8FA", "#FFFFFF", "#F6F8FA", "#EAEEF2", "#D8DEE4", "#1F2328", "#59636E", "#6E7781", "#D0D7DE" },
+                ("GitHub", true)      => new[] { "#58A6FF", "#0D1117", "#1F6FEB", "#FFFFFF", "#0D1117", "#161B22", "#1C2128", "#21262D", "#30363D", "#F0F6FC", "#B1BAC4", "#8B949E", "#30363D" },
                 ("Monokai", false)    => new[] { "#F92672", "#FFFFFF", "#66D9EF", "#272822", "#F8F8F2", "#FFFFFF", "#F4F4EC", "#EBEBE3", "#DEDED5", "#272822", "#5F5F57", "#77776F", "#CFCFC5" },
                 ("Monokai", true)     => new[] { "#A6E22E", "#272822", "#F92672", "#FFFFFF", "#1E1F1C", "#272822", "#2D2E2A", "#34352F", "#3E3D32", "#F8F8F2", "#CFCFC2", "#8F908A", "#49483E" },
                 ("Cyberpunk", false)  => new[] { "#7C3AED", "#FFFFFF", "#0891B2", "#FFFFFF", "#F7F5FF", "#FFFFFF", "#F2F8FA", "#E9E5F7", "#DDD6F0", "#181028", "#51456B", "#75678F", "#CFC5DF" },
@@ -1573,6 +1575,7 @@ namespace openTransferWPF
             SetBrush("FluxSurfaceTint", colors[0]);
             SetBrush("FluxSelectedRowTint", dark ? "#3034D399" : "#20059669");
             SetBrush("FluxHoverTint", dark ? "#12FFFFFF" : "#08000000");
+            ApplyNativeTitleBar(dark);
 
             if (_settingsTabButtons != null)
             {
@@ -1589,6 +1592,19 @@ namespace openTransferWPF
                 return key?.GetValue("AppsUseLightTheme") is int value && value == 0;
             }
             catch { return false; }
+        }
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+        private void ApplyNativeTitleBar(bool dark)
+        {
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+            int enabled = dark ? 1 : 0;
+            // Attribute 20 is supported by current Windows 10/11 builds; 19 is the older fallback.
+            if (DwmSetWindowAttribute(hwnd, 20, ref enabled, sizeof(int)) != 0)
+                DwmSetWindowAttribute(hwnd, 19, ref enabled, sizeof(int));
         }
 
         private void SetBrush(string key, string hex)

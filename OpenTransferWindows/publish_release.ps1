@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 Set-Location $projectDir
 
-$version = "1.2.7"
+$version = "1.2.8"
 $tag = "v$version"
 $repoUrl = "https://github.com/amorsoftlab/OpenTransfer.git"
 
@@ -15,7 +15,7 @@ Write-Host "==================================================" -ForegroundColor
 
 # 1. Clean & Publish WPF App
 Write-Host "`n[1/5] Publishing WPF Binaries (win-x64)..." -ForegroundColor Yellow
-$publishDir = "$projectDir\release_publish"
+$publishDir = "$projectDir\package_publish"
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 if (Test-Path "$projectDir\output") { Remove-Item "$projectDir\output" -Recurse -Force }
 

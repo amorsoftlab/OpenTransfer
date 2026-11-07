@@ -4,6 +4,15 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.8] - 2026-11-07
+
+### 🛠️ Hotfix
+- Completed dark-mode styling for combo boxes, labels, disabled states, title bar, GitHub accents, and no-device placeholders.
+- Fixed device placeholders displaying the internal model class name.
+- Improved no-device storage wording and widened Quick Access placeholders.
+
+---
+
 ## [1.2.7] - 2026-11-07
 
 ### 🛠️ Hotfix

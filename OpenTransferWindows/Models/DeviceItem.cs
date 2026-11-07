@@ -8,5 +8,7 @@ namespace openTransferWPF.Models
         public bool IsWireless => Serial.Contains("_adb-tls-connect._tcp", System.StringComparison.OrdinalIgnoreCase) || Serial.Contains(':');
 
         public string DisplayName => string.IsNullOrEmpty(Serial) ? Model : $"{(IsWireless ? "Wi-Fi" : "USB")} • {Model} ({Serial})";
+
+        public override string ToString() => DisplayName;
     }
 }
