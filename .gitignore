@@ -4,6 +4,7 @@ OpenTransferWindows/testpublish/
 OpenTransferWindows/release_publish/
 OpenTransferWindows/package_publish/
 OpenTransferWindows/verify_publish/
+OpenTransferWindows/theme_verify/
 publish/
 release_output/
 *.user

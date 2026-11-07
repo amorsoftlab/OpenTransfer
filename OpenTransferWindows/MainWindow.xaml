@@ -544,6 +544,12 @@
                                             <ComboBoxItem Content="GitHub"/>
                                             <ComboBoxItem Content="Monokai"/>
                                             <ComboBoxItem Content="Cyberpunk"/>
+                                            <ComboBoxItem Content="Gruvbox"/>
+                                            <ComboBoxItem Content="Ayu"/>
+                                            <ComboBoxItem Content="Material Ocean"/>
+                                            <ComboBoxItem Content="Night Owl"/>
+                                            <ComboBoxItem Content="SynthWave '84"/>
+                                            <ComboBoxItem Content="High Contrast"/>
                                         </ComboBox>
 
                                         <TextBlock Text="Theme Appearance:" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource FluxOnSurfaceVariant}" Margin="0,0,0,6"/>

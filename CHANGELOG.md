@@ -4,6 +4,16 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.9] - 2026-11-07
+
+### 🎨 Themes
+- Redesigned all premium palettes so each theme has a distinct visual identity instead of defaulting to blue accents.
+- Added Gruvbox, Ayu, Material Ocean, Night Owl, SynthWave '84, and High Contrast themes, bringing the total to 18.
+- GitHub now uses a neutral charcoal identity, Solarized uses orange, One Dark uses green, and Cyberpunk uses neon pink.
+- Fixed the no-device dropdown showing the internal `DeviceItem` class name.
+
+---
+
 ## [1.2.8] - 2026-11-07
 
 ### 🛠️ Hotfix

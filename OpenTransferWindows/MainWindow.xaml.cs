@@ -159,6 +159,7 @@ namespace openTransferWPF
                 PnlNoDevice.Visibility = Visibility.Collapsed;
                 LstFiles.Visibility = Visibility.Visible;
                 SetDeviceControlsEnabled(true);
+                CmbDevices.DisplayMemberPath = "DisplayName";
                 CmbDevices.ItemsSource = devices;
                 CmbDevices.DisplayMemberPath = "DisplayName";
                 CmbDevices.SelectedValuePath = "Serial";
@@ -228,7 +229,8 @@ namespace openTransferWPF
             _updatingStorageRoots = true;
             try
             {
-                CmbDevices.ItemsSource = new[] { new DeviceItem { Model = "No device" } };
+                CmbDevices.DisplayMemberPath = string.Empty;
+                CmbDevices.ItemsSource = new[] { "No device" };
                 CmbDevices.SelectedIndex = 0;
                 CmbStorageRoots.ItemsSource = new[] { "No storage" };
                 CmbStorageRoots.SelectedIndex = 0;
@@ -1142,6 +1144,12 @@ namespace openTransferWPF
                 "GitHub" => 9,
                 "Monokai" => 10,
                 "Cyberpunk" => 11,
+                "Gruvbox" => 12,
+                "Ayu" => 13,
+                "MaterialOcean" => 14,
+                "NightOwl" => 15,
+                "SynthWave" => 16,
+                "HighContrast" => 17,
                 _ => 0
             };
             string themeMode = s.ThemeMode == "System" && s.Theme is "Light" or "Dark" ? s.Theme : s.ThemeMode;
@@ -1480,6 +1488,12 @@ namespace openTransferWPF
             9 => "GitHub",
             10 => "Monokai",
             11 => "Cyberpunk",
+            12 => "Gruvbox",
+            13 => "Ayu",
+            14 => "MaterialOcean",
+            15 => "NightOwl",
+            16 => "SynthWave",
+            17 => "HighContrast",
             _ => "Emerald"
         };
 
@@ -1531,26 +1545,38 @@ namespace openTransferWPF
             {
                 ("VSCode", false) => new[] { "#007ACC", "#FFFFFF", "#0067B8", "#FFFFFF", "#F3F3F3", "#FFFFFF", "#F8F8F8", "#F0F0F0", "#E8E8E8", "#1E1E1E", "#4B4B4B", "#6B6B6B", "#D0D0D0" },
                 ("VSCode", true)  => new[] { "#3794FF", "#FFFFFF", "#007ACC", "#FFFFFF", "#181818", "#1E1E1E", "#252526", "#2D2D30", "#333337", "#F1F1F1", "#CCCCCC", "#9D9D9D", "#454545" },
-                ("Nord", false)   => new[] { "#5E81AC", "#FFFFFF", "#4C6F96", "#FFFFFF", "#ECEFF4", "#FFFFFF", "#F7F9FC", "#E5E9F0", "#D8DEE9", "#2E3440", "#4C566A", "#66728A", "#C4CAD4" },
-                ("Nord", true)    => new[] { "#88C0D0", "#2E3440", "#5E81AC", "#FFFFFF", "#242933", "#2E3440", "#343B49", "#3B4252", "#434C5E", "#ECEFF4", "#D8DEE9", "#AAB3C5", "#4C566A" },
+                ("Nord", false)   => new[] { "#4C8C8A", "#FFFFFF", "#8FBCBB", "#24313A", "#ECEFF4", "#FFFFFF", "#F7F9FC", "#E5E9F0", "#D8DEE9", "#2E3440", "#4C566A", "#66728A", "#C4CAD4" },
+                ("Nord", true)    => new[] { "#8FBCBB", "#20252E", "#88C0D0", "#20252E", "#242933", "#2E3440", "#343B49", "#3B4252", "#434C5E", "#ECEFF4", "#D8DEE9", "#AAB3C5", "#4C566A" },
                 ("Dracula", false)=> new[] { "#7C3AED", "#FFFFFF", "#6D28D9", "#FFFFFF", "#F8F7FC", "#FFFFFF", "#F1EFF8", "#EAE6F4", "#DDD7EC", "#282A36", "#56586A", "#727386", "#CEC9DB" },
                 ("Dracula", true) => new[] { "#BD93F9", "#282A36", "#8B5CF6", "#FFFFFF", "#1E1F29", "#282A36", "#30313D", "#383A4A", "#44475A", "#F8F8F2", "#D7D7D2", "#A8A8A2", "#55586D" },
-                ("TokyoNight", false) => new[] { "#34548A", "#FFFFFF", "#2E5C9A", "#FFFFFF", "#E9EDF5", "#FFFFFF", "#F3F5FA", "#E2E7F0", "#D8DEEA", "#1A1B26", "#4C556A", "#6B7488", "#C6CDDA" },
-                ("TokyoNight", true)  => new[] { "#7AA2F7", "#16161E", "#3D59A1", "#FFFFFF", "#16161E", "#1A1B26", "#1F2335", "#24283B", "#2F3549", "#C0CAF5", "#A9B1D6", "#7982A9", "#3B4261" },
+                ("TokyoNight", false) => new[] { "#7656B8", "#FFFFFF", "#9D7CD8", "#FFFFFF", "#E9EDF5", "#FFFFFF", "#F3F5FA", "#E2E7F0", "#D8DEEA", "#1A1B26", "#4C556A", "#6B7488", "#C6CDDA" },
+                ("TokyoNight", true)  => new[] { "#BB9AF7", "#16161E", "#9D7CD8", "#16161E", "#16161E", "#1A1B26", "#1F2335", "#24283B", "#2F3549", "#C0CAF5", "#A9B1D6", "#7982A9", "#3B4261" },
                 ("Catppuccin", false) => new[] { "#8839EF", "#FFFFFF", "#7287FD", "#FFFFFF", "#EFF1F5", "#FFFFFF", "#F5F6FA", "#E6E9EF", "#DCE0E8", "#4C4F69", "#6C6F85", "#8C8FA1", "#CCD0DA" },
                 ("Catppuccin", true)  => new[] { "#CBA6F7", "#1E1E2E", "#89B4FA", "#1E1E2E", "#181825", "#1E1E2E", "#24243A", "#2A2A40", "#313244", "#CDD6F4", "#BAC2DE", "#9399B2", "#45475A" },
-                ("RosePine", false)   => new[] { "#907AA9", "#FFFFFF", "#B4637A", "#FFFFFF", "#FAF4ED", "#FFFAF3", "#F4EDE8", "#EDE5DF", "#E4DAD4", "#575279", "#797593", "#9893A5", "#DFD7D2" },
-                ("RosePine", true)    => new[] { "#C4A7E7", "#191724", "#9CCFD8", "#191724", "#15131E", "#191724", "#1F1D2E", "#26233A", "#2A273F", "#E0DEF4", "#908CAA", "#6E6A86", "#403D52" },
-                ("Solarized", false)  => new[] { "#268BD2", "#FFFFFF", "#2AA198", "#FFFFFF", "#FDF6E3", "#FFFDF5", "#F8F1DD", "#EEE8D5", "#E4DECB", "#073642", "#586E75", "#839496", "#D5CFBD" },
-                ("Solarized", true)   => new[] { "#2AA198", "#002B36", "#268BD2", "#FDF6E3", "#002B36", "#073642", "#0B3B46", "#124651", "#1B4F59", "#EEE8D5", "#93A1A1", "#657B83", "#30545D" },
-                ("OneDark", false)    => new[] { "#4078F2", "#FFFFFF", "#A626A4", "#FFFFFF", "#F5F5F5", "#FFFFFF", "#FAFAFA", "#EAEAEB", "#DEDFE1", "#383A42", "#696C77", "#818387", "#C8C9CB" },
-                ("OneDark", true)     => new[] { "#61AFEF", "#282C34", "#C678DD", "#FFFFFF", "#21252B", "#282C34", "#2C313A", "#333842", "#3E4451", "#ABB2BF", "#9DA5B4", "#7F848E", "#4B5263" },
-                ("GitHub", false)     => new[] { "#0969DA", "#FFFFFF", "#1F6FEB", "#FFFFFF", "#F6F8FA", "#FFFFFF", "#F6F8FA", "#EAEEF2", "#D8DEE4", "#1F2328", "#59636E", "#6E7781", "#D0D7DE" },
-                ("GitHub", true)      => new[] { "#58A6FF", "#0D1117", "#1F6FEB", "#FFFFFF", "#0D1117", "#161B22", "#1C2128", "#21262D", "#30363D", "#F0F6FC", "#B1BAC4", "#8B949E", "#30363D" },
+                ("RosePine", false)   => new[] { "#B4637A", "#FFFFFF", "#D7829B", "#FFFFFF", "#FAF4ED", "#FFFAF3", "#F4EDE8", "#EDE5DF", "#E4DAD4", "#575279", "#797593", "#9893A5", "#DFD7D2" },
+                ("RosePine", true)    => new[] { "#EB6F92", "#191724", "#C76C8A", "#191724", "#15131E", "#191724", "#1F1D2E", "#26233A", "#2A273F", "#E0DEF4", "#908CAA", "#6E6A86", "#403D52" },
+                ("Solarized", false)  => new[] { "#CB4B16", "#FFFFFF", "#D66A2C", "#FFFFFF", "#FDF6E3", "#FFFDF5", "#F8F1DD", "#EEE8D5", "#E4DECB", "#073642", "#586E75", "#839496", "#D5CFBD" },
+                ("Solarized", true)   => new[] { "#CB4B16", "#FDF6E3", "#B94A1D", "#FDF6E3", "#002B36", "#073642", "#0B3B46", "#124651", "#1B4F59", "#EEE8D5", "#93A1A1", "#657B83", "#30545D" },
+                ("OneDark", false)    => new[] { "#4F8A3C", "#FFFFFF", "#78A960", "#FFFFFF", "#F5F5F5", "#FFFFFF", "#FAFAFA", "#EAEAEB", "#DEDFE1", "#383A42", "#696C77", "#818387", "#C8C9CB" },
+                ("OneDark", true)     => new[] { "#98C379", "#21252B", "#76A55C", "#FFFFFF", "#21252B", "#282C34", "#2C313A", "#333842", "#3E4451", "#ABB2BF", "#9DA5B4", "#7F848E", "#4B5263" },
+                ("GitHub", false)     => new[] { "#24292F", "#FFFFFF", "#57606A", "#FFFFFF", "#F6F8FA", "#FFFFFF", "#F6F8FA", "#EAEEF2", "#D8DEE4", "#1F2328", "#59636E", "#6E7781", "#D0D7DE" },
+                ("GitHub", true)      => new[] { "#F0F6FC", "#0D1117", "#30363D", "#F0F6FC", "#0D1117", "#161B22", "#1C2128", "#21262D", "#30363D", "#F0F6FC", "#B1BAC4", "#8B949E", "#30363D" },
                 ("Monokai", false)    => new[] { "#F92672", "#FFFFFF", "#66D9EF", "#272822", "#F8F8F2", "#FFFFFF", "#F4F4EC", "#EBEBE3", "#DEDED5", "#272822", "#5F5F57", "#77776F", "#CFCFC5" },
                 ("Monokai", true)     => new[] { "#A6E22E", "#272822", "#F92672", "#FFFFFF", "#1E1F1C", "#272822", "#2D2E2A", "#34352F", "#3E3D32", "#F8F8F2", "#CFCFC2", "#8F908A", "#49483E" },
-                ("Cyberpunk", false)  => new[] { "#7C3AED", "#FFFFFF", "#0891B2", "#FFFFFF", "#F7F5FF", "#FFFFFF", "#F2F8FA", "#E9E5F7", "#DDD6F0", "#181028", "#51456B", "#75678F", "#CFC5DF" },
-                ("Cyberpunk", true)   => new[] { "#00F5D4", "#071013", "#FF2A6D", "#FFFFFF", "#05080D", "#071013", "#0B151B", "#101D24", "#172832", "#EAFDFC", "#A6C7C8", "#668A8F", "#24404A" },
+                ("Cyberpunk", false)  => new[] { "#D4145A", "#FFFFFF", "#FF2A6D", "#FFFFFF", "#FFF4FA", "#FFFFFF", "#FDF0F7", "#F5E4EF", "#EBD5E4", "#181028", "#51456B", "#75678F", "#CFC5DF" },
+                ("Cyberpunk", true)   => new[] { "#FF2A6D", "#FFFFFF", "#00F5D4", "#071013", "#05080D", "#071013", "#0B151B", "#101D24", "#172832", "#EAFDFC", "#A6C7C8", "#668A8F", "#24404A" },
+                ("Gruvbox", false)    => new[] { "#B57614", "#FFFFFF", "#D79921", "#282828", "#FBF1C7", "#FFFAE0", "#F5E9BE", "#EBDBB2", "#DCCB9D", "#3C3836", "#665C54", "#7C6F64", "#D5C4A1" },
+                ("Gruvbox", true)     => new[] { "#FABD2F", "#282828", "#D79921", "#282828", "#1D2021", "#282828", "#32302F", "#3C3836", "#504945", "#EBDBB2", "#D5C4A1", "#A89984", "#504945" },
+                ("Ayu", false)        => new[] { "#D87800", "#FFFFFF", "#FF9940", "#332B20", "#FAFAFA", "#FFFFFF", "#F7F7F7", "#EFEFEF", "#E4E4E4", "#5C6166", "#787B80", "#8A8F94", "#D3D5D7" },
+                ("Ayu", true)         => new[] { "#FFB454", "#0B0E14", "#E6B450", "#0B0E14", "#0B0E14", "#11151C", "#161B22", "#1C222B", "#242B36", "#BFBDB6", "#8A9199", "#6C7380", "#303640" },
+                ("MaterialOcean", false) => new[] { "#00838F", "#FFFFFF", "#26A69A", "#FFFFFF", "#F4FAFA", "#FFFFFF", "#EDF7F7", "#E2F0F0", "#D4E8E8", "#263238", "#546E7A", "#78909C", "#C4D7DA" },
+                ("MaterialOcean", true)  => new[] { "#89DDFF", "#0F111A", "#2EC4B6", "#0F111A", "#0F111A", "#151821", "#1B1E2B", "#202331", "#292D3E", "#EEFFFF", "#B0BEC5", "#717CB4", "#3B3F51" },
+                ("NightOwl", false)   => new[] { "#7E57C2", "#FFFFFF", "#C792EA", "#1D2330", "#F7F8FC", "#FFFFFF", "#F1F3F8", "#E8EBF2", "#DDE1EB", "#1D3B53", "#4B6475", "#718796", "#C9D2DA" },
+                ("NightOwl", true)    => new[] { "#C792EA", "#011627", "#AD6BD8", "#FFFFFF", "#011627", "#071D2E", "#0B2538", "#112D42", "#17394F", "#D6DEEB", "#A7B8C9", "#637777", "#23475D" },
+                ("SynthWave", false)  => new[] { "#C026D3", "#FFFFFF", "#F472B6", "#FFFFFF", "#FFF5FD", "#FFFFFF", "#FCEFFC", "#F5E3F4", "#EBD4E9", "#241734", "#604B70", "#806B8F", "#D6C3DA" },
+                ("SynthWave", true)   => new[] { "#FF7EDB", "#241B2F", "#B893FF", "#241B2F", "#171520", "#241B2F", "#2B213A", "#342545", "#403052", "#F8F8F2", "#C9B6D8", "#8B729D", "#51405F" },
+                ("HighContrast", false) => new[] { "#000000", "#FFFFFF", "#FFD800", "#000000", "#FFFFFF", "#FFFFFF", "#F5F5F5", "#EBEBEB", "#D8D8D8", "#000000", "#202020", "#404040", "#808080" },
+                ("HighContrast", true)  => new[] { "#FFD800", "#000000", "#00FFFF", "#000000", "#000000", "#080808", "#101010", "#181818", "#242424", "#FFFFFF", "#E8E8E8", "#FFFFFF", "#606060" },
                 ("Emerald", true) => new[] { "#34D399", "#062B22", "#059669", "#FFFFFF", "#101815", "#151E1A", "#1B2722", "#22312A", "#293B32", "#ECFDF5", "#C7E8DA", "#90AFA2", "#3D554B" },
                 _                  => new[] { "#059669", "#FFFFFF", "#047857", "#FFFFFF", "#F3FAF7", "#FFFFFF", "#F7FCFA", "#EAF6F1", "#DDF0E8", "#14231D", "#405B50", "#687E75", "#C5D8D0" }
             };
