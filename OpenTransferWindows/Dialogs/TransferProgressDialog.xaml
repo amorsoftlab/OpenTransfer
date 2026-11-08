@@ -215,7 +215,9 @@
                 <!-- Action Buttons -->
                 <Button x:Name="BtnOpenFolder" Content="📁 Open Folder" Click="BtnOpenFolder_Click"
                         Style="{DynamicResource FluxPrimaryButton}" Width="280" Height="38" Margin="0,0,0,10"/>
-                <Button x:Name="BtnShowFailed" Content="⚠ Show Failed Files" Click="BtnShowFailed_Click"
+                <Button x:Name="BtnRetryFailed" Content="↻ Retry Failed" Click="BtnRetryFailed_Click"
+                        Style="{DynamicResource FluxPrimaryButton}" Width="280" Height="38" Margin="0,0,0,8" Visibility="Collapsed"/>
+                <Button x:Name="BtnShowFailed" Content="⚠ View Failed Files" Click="BtnShowFailed_Click"
                         Style="{DynamicResource FluxGhostButton}" Width="280" Height="36" Margin="0,0,0,8" Visibility="Collapsed"/>
                 <Button Content="Done" Click="BtnDone_Click"
                         Style="{DynamicResource FluxGhostButton}" Width="280" Height="36"/>

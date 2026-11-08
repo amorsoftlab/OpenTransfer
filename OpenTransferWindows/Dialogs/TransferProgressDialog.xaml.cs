@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media.Animation;
@@ -16,6 +18,8 @@ namespace openTransferWPF.Dialogs
         private string _targetFolderPath = string.Empty;
         private Storyboard? _transferAnimation;
         private string _animationDirection = string.Empty;
+        private List<string> _failedItems = new();
+        public event EventHandler<RetryFailedEventArgs>? RetryFailedRequested;
 
         public TransferProgressDialog(CopyEngine copyEngine, CancellationTokenSource cts)
         {
@@ -214,8 +218,13 @@ namespace openTransferWPF.Dialogs
             string targetDeviceStr = isDownload ? "your local computer" : "your Android phone";
             TxtCompleteMessage.Text = $"All {totalCount} selected files have been successfully transferred to {targetDeviceStr}.";
             BtnShowFailed.Visibility = _copyEngine.LastFailedItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            BtnRetryFailed.Visibility = _copyEngine.LastFailedItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            _failedItems = _copyEngine.LastFailedItems.ToList();
             if (_copyEngine.LastFailedItems.Count > 0)
+            {
                 TxtCompleteMessage.Text = $"{copiedCount} of {totalCount} files completed. {_copyEngine.LastFailedItems.Count} failed and can be reviewed.";
+                BtnRetryFailed.Content = $"↻ Retry Failed ({_copyEngine.LastFailedItems.Count})";
+            }
 
             if (!isDownload || !Directory.Exists(_targetFolderPath))
             {
@@ -278,7 +287,21 @@ namespace openTransferWPF.Dialogs
 
         private void BtnShowFailed_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(string.Join(Environment.NewLine, _copyEngine.LastFailedItems), "Failed Files", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(string.Join(Environment.NewLine, _failedItems), "Failed Files", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+
+        private void BtnRetryFailed_Click(object sender, RoutedEventArgs e)
+        {
+            if (_failedItems.Count == 0) return;
+            var args = new RetryFailedEventArgs(_failedItems);
+            Close();
+            RetryFailedRequested?.Invoke(this, args);
+        }
+    }
+
+    public sealed class RetryFailedEventArgs : EventArgs
+    {
+        public IReadOnlyList<string> FailedItems { get; }
+        public RetryFailedEventArgs(IEnumerable<string> failedItems) => FailedItems = failedItems.ToList();
     }
 }

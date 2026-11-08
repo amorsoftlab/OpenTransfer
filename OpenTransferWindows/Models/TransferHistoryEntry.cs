@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace openTransferWPF.Models
 {
@@ -12,7 +13,12 @@ namespace openTransferWPF.Models
         public int TotalFiles { get; set; }
         public int CompletedFiles { get; set; }
         public string Result { get; set; } = string.Empty;
+        public List<string> FailedItems { get; set; } = new();
+        public int FailedCount => FailedItems?.Count ?? 0;
+        public bool CanRetry => FailedCount > 0;
         public string DisplayTime => Timestamp.ToString("yyyy-MM-dd HH:mm");
-        public string Summary => $"{Direction} • {CompletedFiles}/{TotalFiles} files • {Result}";
+        public string Summary => FailedCount > 0
+            ? $"{Direction} • {CompletedFiles}/{TotalFiles} files • {FailedCount} failed"
+            : $"{Direction} • {CompletedFiles}/{TotalFiles} files • {Result}";
     }
 }

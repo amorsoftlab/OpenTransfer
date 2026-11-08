@@ -634,7 +634,12 @@ namespace openTransferWPF
             catch (Exception ex) { MessageBox.Show(ex.Message, "Preview Failed", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        private void BtnHistory_Click(object sender, RoutedEventArgs e) => new TransferHistoryDialog { Owner = this }.ShowDialog();
+        private async void BtnHistory_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new TransferHistoryDialog { Owner = this };
+            if (dialog.ShowDialog() == true && dialog.RetryRequestedEntry is { } entry)
+                await RetryHistoryEntryAsync(entry);
+        }
 
         private void BtnExportSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -710,6 +715,8 @@ namespace openTransferWPF
                 // Show Interactive Progress Dialog
                 _copyCts = new CancellationTokenSource();
                 var progressDlg = new TransferProgressDialog(_copyEngine, _copyCts) { Owner = this };
+                progressDlg.RetryFailedRequested += async (_, args) =>
+                    await RetryDownloadFailedAsync(_currentPath, destFolder, args.FailedItems);
 
                 int lastTotal = 0;
                 int lastCopied = 0;
@@ -757,6 +764,7 @@ namespace openTransferWPF
                     {
                         Direction = "Download", Device = _activeSerial, Source = _currentPath, Destination = destFolder,
                         TotalFiles = lastTotal, CompletedFiles = lastCopied,
+                        FailedItems = _copyEngine.LastFailedItems.ToList(),
                         Result = transferFinished ? (lastCopied == lastTotal ? "Completed" : "Completed with issues") : "Cancelled / Failed"
                     });
                     ShowTransferNotification("Download finished", $"{lastCopied} of {lastTotal} files completed.");
@@ -770,6 +778,89 @@ namespace openTransferWPF
                     }
                     _transferGate.Release();
                 }
+            }
+        }
+
+        private async Task RetryHistoryEntryAsync(TransferHistoryEntry entry)
+        {
+            if (string.IsNullOrEmpty(_activeSerial))
+            {
+                MessageBox.Show("Connect the Android device before retrying failed files.", "No Device", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (!string.IsNullOrEmpty(entry.Device) && !string.Equals(entry.Device, _activeSerial, StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("This transfer belongs to a different Android device. Connect the original device and try again.", "Different Device", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (entry.Direction.Equals("Upload", StringComparison.OrdinalIgnoreCase))
+            {
+                var failedItems = entry.FailedItems ?? new List<string>();
+                var existingFiles = failedItems.Where(File.Exists).ToList();
+                int missing = entry.FailedCount - existingFiles.Count;
+                if (existingFiles.Count == 0)
+                {
+                    MessageBox.Show("The failed source files are no longer available on this PC.", "Retry Unavailable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (missing > 0)
+                    MessageBox.Show($"{missing} source file(s) are missing and cannot be retried.", "Some Files Missing", MessageBoxButton.OK, MessageBoxImage.Information);
+                await StartUploadProcessAsync(existingFiles, entry.Destination, isRetry: true);
+            }
+            else
+            {
+                await RetryDownloadFailedAsync(entry.Source, entry.Destination, entry.FailedItems ?? new List<string>());
+            }
+        }
+
+        private async Task RetryDownloadFailedAsync(string remoteSource, string localDestination, IReadOnlyList<string> failedItems)
+        {
+            if (string.IsNullOrEmpty(_activeSerial) || failedItems.Count == 0) return;
+            if (!Directory.Exists(localDestination)) Directory.CreateDirectory(localDestination);
+
+            int queuePosition = Interlocked.Increment(ref _queuedTransferCount);
+            if (queuePosition > 1) TxtStatusFooter.Text = $"Retry queued (position {queuePosition})";
+            await _transferGate.WaitAsync();
+            Interlocked.Decrement(ref _queuedTransferCount);
+
+            _copyCts = new CancellationTokenSource();
+            var progressDlg = new TransferProgressDialog(_copyEngine, _copyCts) { Owner = this };
+            progressDlg.RetryFailedRequested += async (_, args) =>
+                await RetryDownloadFailedAsync(remoteSource, localDestination, args.FailedItems);
+            int lastTotal = failedItems.Count;
+            int lastCopied = 0;
+            bool transferFinished = false;
+            var progress = new Progress<CopyEngineProgress>(p =>
+            {
+                progressDlg.UpdateProgress(p);
+                lastTotal = p.TotalFileCount;
+                lastCopied = p.CopiedCount;
+                TxtStatusFooter.Text = $"Retrying download ({p.CurrentFileIndex}/{p.TotalFileCount}): {p.CurrentFileName}";
+            });
+            progressDlg.Show();
+            _transferActive = true;
+            try
+            {
+                await _copyEngine.RunDownloadJobAsync(_activeSerial, remoteSource, localDestination, "OverwriteAll",
+                    progress, new Progress<string>(Log), _copyCts.Token, failedItems);
+                transferFinished = true;
+            }
+            catch (OperationCanceledException) { Log("Retry cancelled by user."); }
+            catch (Exception ex) { Log($"Download retry failed: {ex.Message}"); }
+            finally
+            {
+                _transferActive = false;
+                TransferHistoryService.Instance.Add(new TransferHistoryEntry
+                {
+                    Direction = "Download", Device = _activeSerial, Source = remoteSource, Destination = localDestination,
+                    TotalFiles = lastTotal, CompletedFiles = lastCopied, FailedItems = _copyEngine.LastFailedItems.ToList(),
+                    Result = transferFinished && _copyEngine.LastFailedItems.Count == 0 ? "Retry completed" : "Retry completed with issues"
+                });
+                if (transferFinished && !_copyCts.IsCancellationRequested)
+                    progressDlg.ShowCompleteState(lastCopied, lastTotal, localDestination, isDownload: true);
+                else progressDlg.Close();
+                _transferGate.Release();
             }
         }
 
@@ -829,9 +920,10 @@ namespace openTransferWPF
             }
         }
 
-        private async Task StartUploadProcessAsync(List<string> sourcePaths)
+        private async Task StartUploadProcessAsync(List<string> sourcePaths, string? destinationOverride = null, bool isRetry = false)
         {
             if (string.IsNullOrEmpty(_activeSerial)) return;
+            string remoteDestination = string.IsNullOrWhiteSpace(destinationOverride) ? _currentPath : destinationOverride;
 
             // Smart Pre-Check: Check if any remote files conflict with incoming source paths
             var existingNames = new HashSet<string>(_allItems.Select(i => i.Name), StringComparer.OrdinalIgnoreCase);
@@ -846,7 +938,7 @@ namespace openTransferWPF
                 }
             }
 
-            string? strategy = ResolveConflictStrategy(hasConflict);
+            string? strategy = isRetry ? "OverwriteAll" : ResolveConflictStrategy(hasConflict);
             if (strategy == null) return;
 
             int queuePosition = Interlocked.Increment(ref _queuedTransferCount);
@@ -857,6 +949,8 @@ namespace openTransferWPF
             // Show Interactive Progress Dialog
             _copyCts = new CancellationTokenSource();
             var progressDlg = new TransferProgressDialog(_copyEngine, _copyCts) { Owner = this };
+            progressDlg.RetryFailedRequested += async (_, args) =>
+                await StartUploadProcessAsync(args.FailedItems.ToList(), remoteDestination, isRetry: true);
 
             int lastTotal = 0;
             int lastCopied = 0;
@@ -880,7 +974,7 @@ namespace openTransferWPF
                 await _copyEngine.RunUploadJobAsync(
                     _activeSerial,
                     sourcePaths,
-                    _currentPath,
+                    remoteDestination,
                     strategy,
                     progress,
                     logProg,
@@ -902,14 +996,15 @@ namespace openTransferWPF
                 _transferActive = false;
                 TransferHistoryService.Instance.Add(new TransferHistoryEntry
                 {
-                    Direction = "Upload", Device = _activeSerial, Source = string.Join("; ", sourcePaths.Select(Path.GetFileName)), Destination = _currentPath,
+                    Direction = "Upload", Device = _activeSerial, Source = string.Join("; ", sourcePaths.Select(Path.GetFileName)), Destination = remoteDestination,
                     TotalFiles = lastTotal, CompletedFiles = lastCopied,
+                    FailedItems = _copyEngine.LastFailedItems.ToList(),
                     Result = transferFinished ? (lastCopied == lastTotal ? "Completed" : "Completed with issues") : "Cancelled / Failed"
                 });
                 ShowTransferNotification("Upload finished", $"{lastCopied} of {lastTotal} files completed.");
                 if (transferFinished && !_copyCts.IsCancellationRequested)
                 {
-                    progressDlg.ShowCompleteState(lastCopied, lastTotal, _currentPath, isDownload: false);
+                    progressDlg.ShowCompleteState(lastCopied, lastTotal, remoteDestination, isDownload: false);
                 }
                 else
                 {

@@ -4,6 +4,15 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.13] - 2026-11-08
+
+### 🚀 Added
+- Added failed-only retry actions to both Transfer History and the transfer completion summary.
+- Persisted failed file paths in local history so upload/download retries survive app restarts.
+- Download retries now filter the original remote tree to failed files only; upload retries reuse only existing failed local sources and the original destination.
+
+---
+
 ## [1.2.12] - 2026-11-08
 
 ### 🎨 Improved

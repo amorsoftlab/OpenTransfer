@@ -74,11 +74,18 @@ namespace openTransferWPF.Services
             string strategyMode, // "SkipExisting", "OverwriteAll"
             IProgress<CopyEngineProgress> progress,
             IProgress<string> logger,
-            CancellationToken ct)
+            CancellationToken ct,
+            IReadOnlyCollection<string>? onlyRemotePaths = null)
         {
             LastFailedItems.Clear();
             logger.Report($"🔍 Scanning remote folder tree on Android [{remoteSourceDir}]...");
             var remoteFiles = await _adbService.ScanRemoteTreeAsync(serial, remoteSourceDir);
+            if (onlyRemotePaths is { Count: > 0 })
+            {
+                var retrySet = new HashSet<string>(onlyRemotePaths, StringComparer.OrdinalIgnoreCase);
+                remoteFiles = remoteFiles.Where(file => retrySet.Contains(file.Path)).ToList();
+                logger.Report($"↻ Retrying {remoteFiles.Count} previously failed file(s).");
+            }
             logger.Report($"✓ Found {remoteFiles.Count} total files across all subfolders.");
 
             if (remoteFiles.Count == 0)
