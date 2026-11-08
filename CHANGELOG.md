@@ -4,6 +4,13 @@ All notable changes to **OpenTransfer** will be documented in this file.
 
 ---
 
+## [1.2.12] - 2026-11-08
+
+### 🎨 Improved
+- Rebuilt the transfer animation with polished endpoint cards, a glowing transfer lane, a floating document tile, and staggered data particles.
+
+---
+
 ## [1.2.11] - 2026-11-07
 
 ### 🛠️ Fixed

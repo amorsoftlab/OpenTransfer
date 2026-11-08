@@ -235,7 +235,7 @@
 
                         <Border Background="{DynamicResource FluxSurfaceContainerLow}" Padding="12" CornerRadius="6" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Version: 1.2.11 (Release)" FontSize="12" Margin="0,0,0,4"/>
+                                <TextBlock Text="Version: 1.2.12 (Release)" FontSize="12" Margin="0,0,0,4"/>
                                 <TextBlock Text="Build: 2026.08.02-WPF" FontSize="12" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="TxtAdbVersionInfo" Text="ADB Binary: Platform Tools 34.0.5" FontSize="12"/>
                             </StackPanel>

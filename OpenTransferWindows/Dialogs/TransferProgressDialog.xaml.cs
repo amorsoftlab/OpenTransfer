@@ -35,16 +35,21 @@ namespace openTransferWPF.Dialogs
             _transferAnimation?.Stop(this);
             TxtSourceDevice.Text = upload ? "🖥️" : "📱";
             TxtTargetDevice.Text = upload ? "📱" : "🖥️";
+            TxtSourceLabel.Text = upload ? "PC" : "PHONE";
+            TxtTargetLabel.Text = upload ? "PHONE" : "PC";
 
-            double from = upload ? 262 : 0;
-            double to = upload ? 0 : 262;
+            double from = upload ? 278 : 0;
+            double to = upload ? 0 : 278;
+            TimeSpan travelTime = TimeSpan.FromSeconds(1.7);
             _transferAnimation = new Storyboard { RepeatBehavior = RepeatBehavior.Forever };
 
-            AddMotion(_transferAnimation, FileTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.Zero);
-            AddMotion(_transferAnimation, ParticleOneTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.FromMilliseconds(170));
-            AddMotion(_transferAnimation, ParticleTwoTranslate, from, to, TimeSpan.FromSeconds(1.45), TimeSpan.FromMilliseconds(330));
+            AddMotion(_transferAnimation, FileGlowTranslate, from, to, travelTime, TimeSpan.Zero);
+            AddMotion(_transferAnimation, FileTranslate, from, to, travelTime, TimeSpan.Zero);
+            AddMotion(_transferAnimation, ParticleOneTranslate, from, to, travelTime, TimeSpan.FromMilliseconds(140));
+            AddMotion(_transferAnimation, ParticleTwoTranslate, from, to, travelTime, TimeSpan.FromMilliseconds(290));
+            AddMotion(_transferAnimation, ParticleThreeTranslate, from, to, travelTime, TimeSpan.FromMilliseconds(440));
 
-            var pulseX = new DoubleAnimation(0.88, 1.12, TimeSpan.FromMilliseconds(360))
+            var pulseX = new DoubleAnimation(0.94, 1.06, TimeSpan.FromMilliseconds(520))
             {
                 AutoReverse = true,
                 RepeatBehavior = RepeatBehavior.Forever,
@@ -59,13 +64,9 @@ namespace openTransferWPF.Dialogs
             Storyboard.SetTargetProperty(pulseY, new PropertyPath("ScaleY"));
             _transferAnimation.Children.Add(pulseY);
 
-            var particleFade = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever, Duration = TimeSpan.FromSeconds(1.45) };
-            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0)));
-            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0.85, KeyTime.FromPercent(0.22)));
-            particleFade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0.82)));
-            Storyboard.SetTarget(particleFade, ParticleOne);
-            Storyboard.SetTargetProperty(particleFade, new PropertyPath("Opacity"));
-            _transferAnimation.Children.Add(particleFade);
+            AddParticleFade(_transferAnimation, ParticleOne, 0.82, TimeSpan.Zero);
+            AddParticleFade(_transferAnimation, ParticleTwo, 0.72, TimeSpan.FromMilliseconds(150));
+            AddParticleFade(_transferAnimation, ParticleThree, 0.58, TimeSpan.FromMilliseconds(300));
 
             _transferAnimation.Begin(this, true);
         }
@@ -80,6 +81,23 @@ namespace openTransferWPF.Dialogs
             Storyboard.SetTarget(motion, target);
             Storyboard.SetTargetProperty(motion, new PropertyPath("X"));
             storyboard.Children.Add(motion);
+        }
+
+        private static void AddParticleFade(Storyboard storyboard, DependencyObject target, double peakOpacity, TimeSpan delay)
+        {
+            var fade = new DoubleAnimationUsingKeyFrames
+            {
+                BeginTime = delay,
+                RepeatBehavior = RepeatBehavior.Forever,
+                Duration = TimeSpan.FromSeconds(1.7)
+            };
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromPercent(0)));
+            fade.KeyFrames.Add(new EasingDoubleKeyFrame(peakOpacity, KeyTime.FromPercent(0.18), new SineEase { EasingMode = EasingMode.EaseOut }));
+            fade.KeyFrames.Add(new LinearDoubleKeyFrame(peakOpacity * 0.65, KeyTime.FromPercent(0.62)));
+            fade.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromPercent(0.9), new SineEase { EasingMode = EasingMode.EaseIn }));
+            Storyboard.SetTarget(fade, target);
+            Storyboard.SetTargetProperty(fade, new PropertyPath("Opacity"));
+            storyboard.Children.Add(fade);
         }
 
         private static string FormatBytes(long bytes)
